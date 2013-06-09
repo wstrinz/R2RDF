@@ -1,5 +1,6 @@
 require 'rserve'
 require 'rdf/4store'
+Dir[File.dirname(__FILE__) + '/vocabs/*.rb'].each {|file| require file }
 
 class QTL2RDF
 

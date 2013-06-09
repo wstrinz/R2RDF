@@ -1,4 +1,4 @@
-# require_relative 'lib/qtl2rdf.rb'
+# require_relative '../lib/qtl2rdf.rb'
 require 'qtl2rdf'
 def print_usage
   puts "Usage: java -jar QTL2RDF.jar variable [directory] [4store_port] [output]"
