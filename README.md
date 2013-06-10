@@ -11,5 +11,9 @@ You can get a pre-warbled copy of the jar here: http://dropcanvas.com/wi76o/1
     
 
 **Running with Ruby**  
+To run the standalone script as you would the jar:  
 Uncomment first line of `bin/dumpvar.rb`  
-`ruby dumpvar.rb`
+run `ruby dumpvar.rb`  
+
+To use in a program:  
+`require 'lib/qtl2rdf.rb'  

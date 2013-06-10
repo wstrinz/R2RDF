@@ -72,12 +72,17 @@ class QTL2RDF
         dump_dataframe var
       # end
     else
-      p = x.payload
-      if p.size == 1
-        {var => p.first}
+      if x.list?
+        type = x.payload.class.to_s.split("::").last # seems hacky, but probably only temporary
+        value = x.payload.map(&:payload).flatten
+      elsif x.payload.size == 1
+        type = x.class.to_s.split("::").last 
+        value = x.payload.first
       else
-        {var => p}
+        type = x.class.to_s.split("::").last 
+        value = x.payload
       end
+      {var => {"attr"=>{"class" => type}, :value => value}}
     end
   end
 
@@ -97,16 +102,25 @@ class QTL2RDF
         h[var]["attr"].map{ |k,v| statements << RDF::Statement.new(attr_n, vocab[k], RDF::Literal.new(v)) }
       end
 
-      if h[var]["rows"]      
+      if h[var]["rows"]
         h[var]["rows"].map{ |k,v|
-
           row_uri = base_uri.join("row#{k}")
           statements << RDF::Statement.new(row_uri, vocab.row_of, base_n)
           statements << RDF::Statement.new(row_uri, RDF::DC.title, k)
+          num = 1 # maybe container support exists in RDF.rb?
           v.map { |j,u|
-            statements << RDF::Statement.new(row_uri, vocab[j], RDF::Literal.new(u))
+            n = RDF::Node.new
+            statements << RDF::Statement.new(n, vocab.entry_of, row_uri)
+            statements << RDF::Statement.new(n, RDF::DC.title, j)
+            statements << RDF::Statement.new(n, RDF::DC.title, j)
+            statements << RDF::Statement.new(n, vocab["_#{num}"], RDF::Literal.new(u))
+            num += 1
           }
         }
+      end
+
+      if h[var].has_key? :value        
+        statements << RDF::Statement.new(base_n, vocab.has_value, RDF::Literal.new(h[var][:value]))
       end
     else
       statements << RDF::Statement.new(base_n, vocab.has_value, RDF::Literal.new(h[var]))
@@ -114,13 +128,75 @@ class QTL2RDF
     statements
   end
 
+  #get n3 for a dataframe using datacube vocabulary
+  def n3_for(h)
+    str = <<-MEOWF
+    @prefix : <http://www.rqtl.org/ns/#> .
+    @prefix qb: <http://purl.org/linked-data/cube#> .
+    @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    MEOWF
+    var = h.keys.first
+    names = h[var]["attr"]["names"]
+
+    #generate DimensonProperties
+    names.map{ |n|
+      str << ":ref#{n} a rdf:Property, qb:DimensonProperty ;
+      \trdfs:label \"#{n}\"@en ;
+      \trdfs:subPropertyOf sdmx-measure:obsValue .
+      "
+    }
+
+    #generate data structure definition
+    str << ":dsd-#{var} a qb:DataStructureDefinition ;\n"
+    names.map{ |n|
+      str << "\tqb:component [qb:dimension :ref#{n}] ;\n"
+    }
+
+    str << ".\n"
+
+    #generate dataset definition
+    str << ":dataset-#{var} a qb:DataSet ;
+    \trdfs:label \"#{var}\"@en ;
+    \tqb:structure :dsd-#{var} ;
+    .
+    "
+
+    #add observations
+    h[var]["rows"].map{|k,v|
+      str << ":#{k} a qb:Obervation ;
+      \tqb:dataSet :dataset-#{var} ;
+      "
+      v.map{|l,w|
+        str << "\t:ref#{l} #{w} ;\n"
+      }
+      str << ".\n"
+    }
+
+    # puts str
+
+    statements = []
+    RDF::Reader.for(:turtle).new(str) do |reader|
+      reader.each_statement do |statement|
+        # puts statement.inspect
+        statements << statement
+      end
+    end
+    statements
+  end
+
+  def turtletype_for(value)
+    #use for providing ranges to better define data (later)
+  end
+
   def load_statements(statements)
+    #maybe a better way than inserting statements one at a time?
     repo = RDF::FourStore::Repository.new("http://localhost:#{@port_4s}")
     statements.each{|s| repo.insert(s)}
   end
 
-  def to_store(var)
-    load_statements(triples_for(dump(var)))
+  def to_store(var, parse_type=:turtle)
+    load_statements(triples_for(dump(var))) if parse_type==:ntriples
+    load_statements(n3_for(dump(var))) if parse_type==:turtle
   end
 
   def vars
