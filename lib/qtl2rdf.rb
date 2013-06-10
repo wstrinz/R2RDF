@@ -7,7 +7,7 @@ class QTL2RDF
   attr_accessor :port_4s
 
   def initialize(dir='.')
-    dir = File.absolute_path(dir)
+    @dir = File.absolute_path(dir)
     @R = Rserve::Connection.new()
     if File.exist?(dir + "/.RData")
       # puts "loading workspace #{dir}/.RData"
@@ -22,7 +22,27 @@ class QTL2RDF
     @port_4s = 8080
   end
 
-  def dump_mr(var)
+  def load_workspace(dir=@dir,file='.RData')
+    path = File.join(File.absolute_path(dir),file)
+      if File.exist?(path)
+        # puts "loading workspace #{dir}/.RData"
+        @R.eval("load('#{path}')")
+      else
+        puts "Couldn't find #{path}"
+      end
+  end
+
+  def load_history(dir=@dir,file='.Rhistory')
+    path = File.join(File.absolute_path(dir),file)
+    if File.exist?(path)
+      # puts "loading history #{dir}/.Rhistory"
+      @R.eval("loadhistory('#{path}')")
+    else
+      puts "Couldn't find #{path}"
+    end
+  end
+
+  def dump_dataframe(var)
     h = {}
     h[var] = {"attr" => {}, "rows"=>{}}
 
@@ -45,6 +65,22 @@ class QTL2RDF
     h
   end
 
+  def dump(var)
+    x = @R.eval(var)
+    if x.attr
+      # if x.attr.payload["class"].to_a.include? 'data.frame'
+        dump_dataframe var
+      # end
+    else
+      p = x.payload
+      if p.size == 1
+        {var => p.first}
+      else
+        {var => p}
+      end
+    end
+  end
+
   def triples_for(h)
     statements = []
     base_n = RDF::Node.new
@@ -54,20 +90,27 @@ class QTL2RDF
     var = h.keys.first
 
     statements << RDF::Statement.new(base_n, RDF::DC.title, RDF::Literal.new(var))
-    statements << RDF::Statement.new(base_n, vocab.attributes, attr_n)
 
-    h[var]["attr"].map{ |k,v| statements << RDF::Statement.new(attr_n, vocab[k], RDF::Literal.new(v)) }
+    if h[var].is_a? Hash
+      if(h[var]["attr"])
+        statements << RDF::Statement.new(base_n, vocab.attributes, attr_n)
+        h[var]["attr"].map{ |k,v| statements << RDF::Statement.new(attr_n, vocab[k], RDF::Literal.new(v)) }
+      end
 
-    h[var]["rows"].map{ |k,v|
+      if h[var]["rows"]      
+        h[var]["rows"].map{ |k,v|
 
-      row_uri = base_uri.join("row#{k}")
-      statements << RDF::Statement.new(row_uri, vocab.row_of, base_n)
-      statements << RDF::Statement.new(row_uri, RDF::DC.title, k)
-      v.map { |j,u|
-        statements << RDF::Statement.new(row_uri, vocab[j], RDF::Literal.new(u))
-      }
-    }
-
+          row_uri = base_uri.join("row#{k}")
+          statements << RDF::Statement.new(row_uri, vocab.row_of, base_n)
+          statements << RDF::Statement.new(row_uri, RDF::DC.title, k)
+          v.map { |j,u|
+            statements << RDF::Statement.new(row_uri, vocab[j], RDF::Literal.new(u))
+          }
+        }
+      end
+    else
+      statements << RDF::Statement.new(base_n, vocab.has_value, RDF::Literal.new(h[var]))
+    end
     statements
   end
 
@@ -77,7 +120,7 @@ class QTL2RDF
   end
 
   def to_store(var)
-    load_statements(triples_for(dump_mr(var)))
+    load_statements(triples_for(dump(var)))
   end
 
   def vars
