@@ -129,53 +129,69 @@ class QTL2RDF
   end
 
   #get n3 for a dataframe using datacube vocabulary
+  #still needs range for measures and dimensions, sdmx-dimension equivalent for rows
   def n3_for(h)
-    str = <<-MEOWF
-    @prefix : <http://www.rqtl.org/ns/#> .
-    @prefix qb: <http://purl.org/linked-data/cube#> .
-    @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-    MEOWF
+    str = <<-EOF
+@prefix : <http://www.rqtl.org/ns/#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#>
+
+    EOF
     var = h.keys.first
     names = h[var]["attr"]["names"]
 
-    #generate DimensonProperties
+    #add DimensionProperty for row
+    str << <<-EOF
+:refRow a rdf:Property, qb:DimensionProperty ;
+\trdfs:label "Row"@en .
+
+    EOF
+
+    #generate MeasureProperties
     names.map{ |n|
-      str << ":ref#{n} a rdf:Property, qb:DimensonProperty ;
+      str << ":#{n} a rdf:Property, qb:MeasureProperty ;
       \trdfs:label \"#{n}\"@en ;
       \trdfs:subPropertyOf sdmx-measure:obsValue .
-      "
+      \n"
     }
 
     #generate data structure definition
     str << ":dsd-#{var} a qb:DataStructureDefinition ;\n"
+    str << "\tqb:component 
+    \t\t[qb:dimension :refRow] ,
+    "
     names.map{ |n|
-      str << "\tqb:component [qb:dimension :ref#{n}] ;\n"
+      str << "\t\t[qb:measure :#{n}] ,\n"
     }
 
-    str << ".\n"
-
+    str[-2] = '.'
+    str << "\n"
     #generate dataset definition
     str << ":dataset-#{var} a qb:DataSet ;
     \trdfs:label \"#{var}\"@en ;
     \tqb:structure :dsd-#{var} ;
-    .
-    "
+    \t.
+    \n"
 
     #add observations
     h[var]["rows"].map{|k,v|
       str << ":#{k} a qb:Obervation ;
       \tqb:dataSet :dataset-#{var} ;
+      \t:refRow \"#{k}\" ;
       "
       v.map{|l,w|
-        str << "\t:ref#{l} #{w} ;\n"
+        str << "\t:#{l} #{w} ;\n"
       }
-      str << ".\n"
+      str << "\t.\n\n"
     }
 
-    # puts str
+    str
+  end
 
+  def statements_for(string,type=:turtle)
     statements = []
-    RDF::Reader.for(:turtle).new(str) do |reader|
+    RDF::Reader.for(:turtle).new(string) do |reader|
       reader.each_statement do |statement|
         # puts statement.inspect
         statements << statement

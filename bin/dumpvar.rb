@@ -24,7 +24,7 @@ if port
 end
 
 if out
-  puts cl.triples_for(cl.dump(var))
+  puts cl.n3_for(cl.dump(var))
 else
   cl.to_store(var)
 end
