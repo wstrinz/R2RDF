@@ -135,11 +135,31 @@ class QTL2RDF
 @prefix : <http://www.rqtl.org/ns/#> .
 @prefix qb: <http://purl.org/linked-data/cube#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#>
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prop: <http://www.rqtl.org/dc/properties/> .
+@prefix cs: <http://www.rqtl.org/dc/cs/> .
 
     EOF
+    #@prefix sdmx-measure: <http://purl.org/linked-data/sdmx/2009/measure#>
     var = h.keys.first
     names = h[var]["attr"]["names"]
+
+    #generate data structure definition
+    str << ":dsd-#{var} a qb:DataStructureDefinition ;\n"
+    str << "\tqb:component cs:refRow ,\n"
+    names.map{ |n|
+      str << "\t\tcs:#{n} ,\n\n"
+    }
+    str[-3]="."
+
+    #generate component specifications
+    str << "cs:refRow a qb:ComponentSpecification ;\n\trdfs:label \"Component Specification for Row\" ;\n\tqb:dimension prop:refRow .\n\n"
+    names.map{ |n|
+      str << "cs:#{n} a qb:ComponentSpecification ;\n\trdfs:label \"Component Specification for #{n}\" ;\n\tqb:measure prop:#{n} .\n\n"
+    }
+
+    #generate dataset definition
+    str << ":dataset-#{var} a qb:DataSet ;\n\trdfs:label \"#{var}\"@en ;\n\tqb:structure :dsd-#{var} .\n\n"
 
     #add DimensionProperty for row
     str << <<-EOF
@@ -150,40 +170,21 @@ class QTL2RDF
 
     #generate MeasureProperties
     names.map{ |n|
-      str << ":#{n} a rdf:Property, qb:MeasureProperty ;
-      \trdfs:label \"#{n}\"@en ;
-      \trdfs:subPropertyOf sdmx-measure:obsValue .
-      \n"
+      str << ":#{n} a rdf:Property, qb:MeasureProperty ;\n\trdfs:label \"#{n}\"@en .\n\n"
     }
-
-    #generate data structure definition
-    str << ":dsd-#{var} a qb:DataStructureDefinition ;\n"
-    str << "\tqb:component 
-    \t\t[qb:dimension :refRow] ,
-    "
-    names.map{ |n|
-      str << "\t\t[qb:measure :#{n}] ,\n"
-    }
-
-    str[-2] = '.'
-    str << "\n"
-    #generate dataset definition
-    str << ":dataset-#{var} a qb:DataSet ;
-    \trdfs:label \"#{var}\"@en ;
-    \tqb:structure :dsd-#{var} ;
-    \t.
-    \n"
 
     #add observations
     h[var]["rows"].map{|k,v|
-      str << ":#{k} a qb:Obervation ;
-      \tqb:dataSet :dataset-#{var} ;
-      \t:refRow \"#{k}\" ;
-      "
+      str << ":obs#{k} a qb:Observation ;\n\tqb:dataSet :dataset-#{var} ;\n\tprop:refRow :#{k} ;\n"
       v.map{|l,w|
-        str << "\t:#{l} #{w} ;\n"
+        str << "\tprop:#{l} #{w} ;\n"
       }
       str << "\t.\n\n"
+    }
+
+    #add row property definitions
+    h[var]["rows"].map{|k,v|
+      str << ":#{k} a prop:refRow ;\n\trdfs:label \"#{k}\" .\n\n"
     }
 
     str

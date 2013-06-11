@@ -5,6 +5,8 @@ You can get a pre-warbled copy of the jar here: http://dropcanvas.com/wi76o/1
 
 **Building jar File**  
 
+You must use jruby to build the .jar file, otherwise warbler will include the wrong versions of some gems.
+
     gem install warbler  
     bundle install  
     warble  

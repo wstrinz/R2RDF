@@ -40,4 +40,5 @@ Thumbs.db
 # RDF Serialized files #
 ########################
 *.n3
+*.ttl
 *.rdf
