@@ -213,6 +213,9 @@ class QTL2RDF
 
   def to_store(var, parse_type=:turtle)
     load_statements(triples_for(dump(var))) if parse_type==:ntriples
+    
+    #TODO: this doesn't work (needs to be converted to statments or 
+    # a way of inserting raw strings needs to be figured out.
     load_statements(n3_for(dump(var))) if parse_type==:turtle
   end
 
