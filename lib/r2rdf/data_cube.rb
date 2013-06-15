@@ -1,3 +1,12 @@
+	#monkey patch to make rdf string w/ heredocs prettier ;)	
+  class String
+    def unindent
+      gsub /^#{self[/\A\s*/]}/, ''
+     # gsub(/^#{scan(/^\s*/).min_by{|l|l.length}}/, "")
+    end
+
+  end
+
 module R2RDF
   # used to generate data cube observations, data structure definitions, etc
   class DataCube
@@ -48,22 +57,40 @@ module R2RDF
 	end
 
 	def dimension_properties(rexp, type=:dataframe)
-		":refRow a rdf:Property, qb:DimensionProperty ;\n\
-		\trdfs:label \"Row\"@en .\n\n"
+		<<-EOF.unindent
+		:refRow a rdf:Property, qb:DimensionProperty ;
+		\trdfs:label "Row"@en .
+		
+		EOF
 	end
 
 	def measure_properties(rexp, type=:dataframe)
+		props = []
 		if type == :dataframe
-			rexp.attr.payload["row.names"].map{|n|
-                                str << "\tcs:#{n} a rdf:Property, qb:MeasureProperty ;\n\
-                                        \trdfs:label \"#{n}\" ;\n\n"
+			rexp.attr.payload["row.names"].to_ruby.map{|n|
+				props <<  <<-EOF.unindent
+				:#{n} a rdf:Property, qb:MeasureProperty ;
+					\trdfs:label "#{n}"@en .
+				
+				EOF
                 	}
 		end
+		props
 	end
 
 	
 	def observations(rexp, type=:dataframe)	
-		
+		str = ""
+		if type == :dataframe
+			x.attr.payload["row.names"].to_ruby.each_with_index.map{|r, i|
+				str << ":obs #{r} a qb:Observation ;\n\
+					\tqb:dataSet :dataset-#{var} ;\n\
+					\tprop:refRow :#{r} ;\n"
+				x.payload.map{|c| str << "\tprop:#{l} #{w} ;\n"}
+				str << "\t.\n\n"
+			}
+		end
+		str
 	end
   end
 end
