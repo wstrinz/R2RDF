@@ -1,4 +1,4 @@
-	#monkey patch to make rdf string w/ heredocs prettier ;)	
+  #monkey patch to make rdf string w/ heredocs prettier ;)	
   class String
     def unindent
       gsub /^#{self[/\A\s*/]}/, ''
@@ -21,39 +21,48 @@ module R2RDF
 		str << "\tcs:refRow a qb:ComponentSpecification,\n"
 		#should eventually move these reusable map functions over to
 		#the analyzer class
-		rexp.attr.payload["row.names"].map{|n|
+		rexp.attr.payload["row.names"].to_ruby.map{|n|
 			str << "\t\tcs:#{n} ,\n"
 		}
 		str[-2]='.'
 		str<<"\n"
 	end
 	str
+	# Still needs: 
 	# Row names 
 	# Recursiveness
 	# class and other attributes
-	# how to handle measure properties etc?
     end
 
 	def dataset(rexp,type=:dataframe)
-		    ":dataset-#{@var} a qb:DataSet ;\n\
-			\trdfs:label \"#{@var}\"@en ;\n\
-			\tqb:structure :dsd-#{@var} .\n\n"
+		<<-EOF.unindent    
+		:dataset-#{@var} a qb:DataSet ;
+			rdfs:label "#{@var}"@en ;
+			qb:structure :dsd-#{@var} .
+
+		EOF
 	end
 
 	def component_specifications(rexp, type=:dataframe)
-		str = ""
+		specs = []
 		if type == :dataframe
-			str << "cs:refRow a qb:ComponentSpecification ;\n\
-				\trdfs:label \"Component Spec for #{@var}\" ;\n\
-				\tqb:dimension prop:refRow .\n\n"
-			
+			specs << <<-EOF.unindent 
+			cs:refRow a qb:ComponentSpecification ;
+				rdfs:label "Component Spec for Row" ;
+				qb:dimension prop:refRow .
+
+			EOF
 			#still needs method for distinguishing measure vs dimension
-			rexp.attr.payload["row.names"].map{|n|
-				str << "\tcs:#{n} a qb:ComponentSpecification ;\n\
-					\trdfs:label \"Component Spec for #{n}\" ;\n\
-					\tqb:measure prop:#{n} .\n\n"
+			rexp.attr.payload["row.names"].to_ruby.map{|n|
+				specs << <<-EOF.unindent
+						cs:#{n} a qb:ComponentSpecification ;
+							rdfs:label "Component Spec for #{n}" ;
+							qb:measure prop:#{n} .
+
+					EOF
 			}
 		end
+		specs
 	end
 
 	def dimension_properties(rexp, type=:dataframe)
@@ -80,17 +89,20 @@ module R2RDF
 
 	
 	def observations(rexp, type=:dataframe)	
-		str = ""
+		obs = []
 		if type == :dataframe
-			x.attr.payload["row.names"].to_ruby.each_with_index.map{|r, i|
-				str << ":obs #{r} a qb:Observation ;\n\
-					\tqb:dataSet :dataset-#{var} ;\n\
-					\tprop:refRow :#{r} ;\n"
-				x.payload.map{|c| str << "\tprop:#{l} #{w} ;\n"}
+			rexp.attr.payload["row.names"].to_ruby.each_with_index.map{|r, i|
+				str = <<-EOF.unindent 
+					:obs #{r} a qb:Observation ;
+						qb:dataSet :dataset-#{@var} ;
+						prop:refRow :#{r} ;
+					EOF
+				rexp.payload.names.map{|n| str << "\tprop:#{n} #{rexp.payload[n].to_a[i]} ;\n"}
 				str << "\t.\n\n"
+				obs << str
 			}
 		end
-		str
+		obs
 	end
   end
 end
