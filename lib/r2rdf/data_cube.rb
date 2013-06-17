@@ -25,7 +25,7 @@ module R2RDF
     def data_structure_definition(rexp,var,type=:dataframe)
 			str = "dsd-#{var} a qb:DataStructureDefinition;\n"
 			if type == :dataframe
-				str << "\tcs:refRow a qb:ComponentSpecification,\n"
+				str << "\tqb:component cs:refRow ,\n"
 				#should eventually move these reusable map functions over to
 				#the analyzer class
 				rexp.payload.names.map{|n|
@@ -100,7 +100,7 @@ module R2RDF
 				rexp.attr.payload["row.names"].to_ruby.map{|r|
 					rows << <<-EOF.unindent
 						:#{r} a prop:refRow ;
-							rdfs:label "#{r}" ;
+							rdfs:label "#{r}" .
 
 					EOF
 				}
