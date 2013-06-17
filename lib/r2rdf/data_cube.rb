@@ -9,14 +9,10 @@
 
 module R2RDF
   # used to generate data cube observations, data structure definitions, etc
-  class DataCube
+  module DataCube
 
-    def initialize(variable_name="DC#{Time.now.to_i}")
-      @var = variable_name
-    end
-
-    def data_structure_definition(rexp,type=:dataframe)
-	str = "dsd-#{@var} a qb:DataStructureDefinition;\n"
+    def data_structure_definition(rexp,var,type=:dataframe)
+	str = "dsd-#{var} a qb:DataStructureDefinition;\n"
 	if type == :dataframe
 		str << "\tcs:refRow a qb:ComponentSpecification,\n"
 		#should eventually move these reusable map functions over to
@@ -34,16 +30,16 @@ module R2RDF
 	# class and other attributes
     end
 
-	def dataset(rexp,type=:dataframe)
+	def dataset(rexp,var,type=:dataframe)
 		<<-EOF.unindent    
 		:dataset-#{@var} a qb:DataSet ;
-			rdfs:label "#{@var}"@en ;
+			rdfs:label "#{var}"@en ;
 			qb:structure :dsd-#{@var} .
 
 		EOF
 	end
 
-	def component_specifications(rexp, type=:dataframe)
+	def component_specifications(rexp,var, type=:dataframe)
 		specs = []
 		if type == :dataframe
 			specs << <<-EOF.unindent 
@@ -65,7 +61,7 @@ module R2RDF
 		specs
 	end
 
-	def dimension_properties(rexp, type=:dataframe)
+	def dimension_properties(rexp,var,type=:dataframe)
 		<<-EOF.unindent
 		:refRow a rdf:Property, qb:DimensionProperty ;
 		\trdfs:label "Row"@en .
@@ -73,7 +69,7 @@ module R2RDF
 		EOF
 	end
 
-	def measure_properties(rexp, type=:dataframe)
+	def measure_properties(rexp,var,type=:dataframe)
 		props = []
 		if type == :dataframe
 			rexp.attr.payload["row.names"].to_ruby.map{|n|
@@ -88,13 +84,13 @@ module R2RDF
 	end
 
 	
-	def observations(rexp, type=:dataframe)	
+	def observations(rexp, var, type=:dataframe)	
 		obs = []
 		if type == :dataframe
 			rexp.attr.payload["row.names"].to_ruby.each_with_index.map{|r, i|
 				str = <<-EOF.unindent 
 					:obs #{r} a qb:Observation ;
-						qb:dataSet :dataset-#{@var} ;
+						qb:dataSet :dataset-#{var} ;
 						prop:refRow :#{r} ;
 					EOF
 				rexp.payload.names.map{|n| str << "\tprop:#{n} #{rexp.payload[n].to_a[i]} ;\n"}

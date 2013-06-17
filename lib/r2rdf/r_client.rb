@@ -1,15 +1,47 @@
 module R2RDF
-  class RClient
-    def initialize
-      @R = RServe::Connection.new
-    end
+	module Rconnect
+		require 'rserve'
+		
+		def connect(address=nil)
+			if address
+				Rserve::Connection.new(address)
+			else
+				Rserve::Connection.new
+			end
+		end
 
-    def vars
-      @R.eval("ls()").payload
-    end
+		def load_workspace(connection,loc=Dir.home,file=".RData")
+			loc = File.join(loc,file)
+			connection.eval "load(\"#{loc}\")"
+		end
 
-    def get(var)
-      @R.eval(var)
-    end
+		def get(connection, instruction)
+			connection.eval instruction
+		end
+
+		def get_vars(connection)
+			connection.eval("ls()")
+		end
+	end 
+
+	class Rclient
+		include R2RDF::Rconnect
+		def initialize(auto=true)
+      @R = connect
+			load_ws if auto
+			puts "vars: #{vars.payload}" if auto
+		end
+
+		def load_ws
+			load_workspace(@R)
+		end
+
+		def get_var(var)
+			get(@R,var)
+		end
+
+		def vars
+			get_vars(@R)
+		end
   end
 end
