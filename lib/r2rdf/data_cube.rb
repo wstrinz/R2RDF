@@ -78,11 +78,15 @@ module R2RDF
 
 		def dimension_properties(rexp,var,options={})
       type = options[:type] || :dataframe
-			<<-EOF.unindent
-			:refRow a rdf:Property, qb:DimensionProperty ;
-				rdfs:label "Row"@en .
-			
-			EOF
+      props = []
+      if type == :dataframe
+  			props << <<-EOF.unindent
+  			:refRow a rdf:Property, qb:DimensionProperty ;
+  				rdfs:label "Row"@en .
+  			
+  			EOF
+      end
+      props
 		end
 
 		def measure_properties(rexp,var,options={})
