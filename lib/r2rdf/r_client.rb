@@ -24,7 +24,7 @@ module R2RDF
 		end
 	end 
 
-	class Rclient
+	class Client
 		include R2RDF::Rconnect
 		def initialize(auto=true)
       @R = connect

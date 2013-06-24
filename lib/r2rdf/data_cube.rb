@@ -10,7 +10,8 @@
 module R2RDF
   # used to generate data cube observations, data structure definitions, etc
   module DataCube
-		def prefixes(type=:dataframe)
+		def prefixes(options={})
+      type = options[:type] || :dataframe
 			<<-EOF.unindent
 			@prefix : <http://www.rqtl.org/ns/#> .
 			@prefix qb: <http://purl.org/linked-data/cube#> .
@@ -22,7 +23,8 @@ module R2RDF
 			EOF
 		end
 
-    def data_structure_definition(rexp,var,type=:dataframe)
+    def data_structure_definition(rexp,var,options={})
+      type = options[:type] || :dataframe
 			str = "dsd-#{var} a qb:DataStructureDefinition;\n"
 			if type == :dataframe
 				str << "\tqb:component cs:refRow ,\n"
@@ -41,7 +43,8 @@ module R2RDF
 			#	class and other attributes
     end
 
-		def dataset(rexp,var,type=:dataframe)
+		def dataset(rexp,var,options={})
+      type = options[:type] || :dataframe
 			<<-EOF.unindent    
 			:dataset-#{@var} a qb:DataSet ;
 				rdfs:label "#{var}"@en ;
@@ -50,7 +53,8 @@ module R2RDF
 			EOF
 		end
 
-		def component_specifications(rexp,var, type=:dataframe)
+		def component_specifications(rexp,var, options={})
+      type = options[:type] || :dataframe
 			specs = []
 			if type == :dataframe
 				specs << <<-EOF.unindent 
@@ -72,7 +76,8 @@ module R2RDF
 			specs
 		end
 
-		def dimension_properties(rexp,var,type=:dataframe)
+		def dimension_properties(rexp,var,options={})
+      type = options[:type] || :dataframe
 			<<-EOF.unindent
 			:refRow a rdf:Property, qb:DimensionProperty ;
 				rdfs:label "Row"@en .
@@ -80,7 +85,8 @@ module R2RDF
 			EOF
 		end
 
-		def measure_properties(rexp,var,type=:dataframe)
+		def measure_properties(rexp,var,options={})
+      type = options[:type] || :dataframe
 			props = []
 			if type == :dataframe
 				rexp.payload.names.map{|n|
@@ -94,7 +100,8 @@ module R2RDF
 			props
 		end
 
-		def rows(rexp, var, type=:dataframe)
+		def rows(rexp, var, options={})
+      type = options[:type] || :dataframe
 			rows = []
 			if type == :dataframe
 				rexp.attr.payload["row.names"].to_ruby.map{|r|
@@ -108,7 +115,8 @@ module R2RDF
 			rows
 		end
 	
-		def observations(rexp, var, type=:dataframe)	
+		def observations(rexp, var, options={})	
+      type = options[:type] || :dataframe
 			obs = []
 			if type == :dataframe
 				rexp.attr.payload["row.names"].to_ruby.each_with_index.map{|r, i|
