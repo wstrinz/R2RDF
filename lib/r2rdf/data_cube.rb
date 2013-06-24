@@ -25,7 +25,7 @@ module R2RDF
 
     def data_structure_definition(rexp,var,options={})
       type = options[:type] || :dataframe
-			str = "dsd-#{var} a qb:DataStructureDefinition;\n"
+			str = ":dsd-#{var} a qb:DataStructureDefinition;\n"
 			if type == :dataframe
 				str << "\tqb:component cs:refRow ,\n"
 				#should eventually move these reusable map functions over to
@@ -154,7 +154,7 @@ module R2RDF
 			str << data_structure_definition(rexp,@var)
 			str << dataset(rexp,@var)
 			component_specifications(rexp,@var).map{ |c| str << c }
-			str << dimension_properties(rexp,@var)
+			dimension_properties(rexp,@var).map{|p| str << p}
 			measure_properties(rexp,@var).map{|p| str << p}
 			rows(rexp,@var).map{|r| str << r}
 			observations(rexp,@var).map{|o| str << o}
