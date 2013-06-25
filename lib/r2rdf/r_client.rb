@@ -26,6 +26,8 @@ module R2RDF
 
 	class Client
 		include R2RDF::Rconnect
+    attr :R
+    
 		def initialize(auto=true)
       @R = connect
 			load_ws if auto
