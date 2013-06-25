@@ -108,7 +108,9 @@ module R2RDF
       type = options[:type] || :dataframe
 			rows = []
 			if type == :dataframe
-				rexp.attr.payload["row.names"].to_ruby.map{|r|
+        names = rexp.attr.payload["row.names"].to_ruby
+        names = 1..rexp.payload.first.to_ruby.size unless names.first
+				names.map{|r|
 					rows << <<-EOF.unindent
 						:#{r} a prop:refRow ;
 							rdfs:label "#{r}" .
@@ -123,7 +125,9 @@ module R2RDF
       type = options[:type] || :dataframe
 			obs = []
 			if type == :dataframe
-				rexp.attr.payload["row.names"].to_ruby.each_with_index.map{|r, i|
+        names = rexp.attr.payload["row.names"].to_ruby
+        names = 1..rexp.payload.first.to_ruby.size unless names.first
+				names.each_with_index.map{|r, i|
 					str = <<-EOF.unindent 
 						:obs#{r} a qb:Observation ;
 							qb:dataSet :dataset-#{var} ;
