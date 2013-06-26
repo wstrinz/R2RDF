@@ -48,7 +48,6 @@ module R2RDF
 			end
 			str
 			# Still needs: 
-			# Row names 
 			# Recursiveness
 			#	class and other attributes
     end
@@ -72,21 +71,21 @@ module R2RDF
 				options[:dimensions].map{|d|
         specs << <<-EOF.unindent
 					cs:#{d} a qb:ComponentSpecification ;
-						rdfs:label "Component Spec for #{d}" ;
+						rdfs:label "#{d} Component" ;
 						qb:dimension prop:#{d} .
 
 					EOF
         }
 				#still needs method for distinguishing measure vs dimension
 				if options[:measures].first == :all
-          measures = rexp.payload.names
+          measures = rexp.payload.names - options[:dimensions]
         else
-          measures = (rexp.payload.names & options[:measures])
+          measures = ((rexp.payload.names - options[:dimensions]) & options[:measures])
         end
         measures.map{|n|
 					specs << <<-EOF.unindent
 						cs:#{n} a qb:ComponentSpecification ;
-							rdfs:label "Component Spec for #{n}" ;
+							rdfs:label "#{n} Component" ;
 							qb:measure prop:#{n} .
 
 						EOF
@@ -102,21 +101,21 @@ module R2RDF
       if options[:type] == :dataframe
   			if options[:dimensions].include? "refRow"
           props << <<-EOF.unindent
-    			:refRow a rdf:Property, qb:DimensionProperty ;
+    			prop:refRow a rdf:Property, qb:DimensionProperty ;
     				rdfs:label "Row"@en .
     			
     			EOF
         else
-        	#Keep row for now even if not specified. Remove later to save space.
+        	#Keep row for now even if not specified. Maybe remove later to save space?
           props << <<-EOF.unindent
-          :refRow a rdf:Property;
+          prop:refRow a rdf:Property;
             rdfs:label "Row"@en .
 
           EOF
         end
         (options[:dimensions] - ["refRow"]).map{|d|
           props << <<-EOF.unindent
-          :#{d} a rdf:Property, qb:DimensionProperty ;
+          prop:#{d} a rdf:Property, qb:DimensionProperty ;
             rdfs:label "#{d}"@en .
           
           EOF
@@ -131,15 +130,15 @@ module R2RDF
 			props = []
 			if options[:type] == :dataframe
         if options[:measures].first == :all
-  				rexp.payload.names.map{|n|
+  				(rexp.payload.names - options[:dimensions]).map{|n|
   					props <<  <<-EOF.unindent
-  					:#{n} a rdf:Property, qb:MeasureProperty ;
+  					prop:#{n} a rdf:Property, qb:MeasureProperty ;
   						rdfs:label "#{n}"@en .
   				
   					EOF
           }
         else
-          (options[:measures] & rexp.payload.names).map{ |m|
+          ((options[:measures] - options[:dimensions]) & rexp.payload.names).map{ |m|
             
             props <<  <<-EOF.unindent
             :#{m} a rdf:Property, qb:MeasureProperty ;
@@ -183,19 +182,50 @@ module R2RDF
 							qb:dataSet :dataset-#{var} ;
 							rdfs:label "#{r}" ;
 						EOF
-					str << "\tprop:refRow :#{r} ;\n" if options[:dimensions].include? "refRow"
+					str << "\tprop:refRow :r#{r} ;\n" if options[:dimensions].include? "refRow"
 					#TODO proper naming for dimensions, hopefully using coded properties
-					(options[:dimensions] - ["refRow"]).map{|d| str << "\tprop:#{d} :#{d}#{rexp.payload[d].to_a[i]} ;\n"}
+					(options[:dimensions] - ["refRow"]).map{|d| str << "\tprop:#{d} :#{to_resource(rexp.payload[d].to_ruby[i])} ;\n"}
 					if options[:measures].first == :all
-						rexp.payload.names.map{|n| str << "\tprop:#{n} #{rexp.payload[n].to_a[i]} ;\n"}
+						(rexp.payload.names - options[:dimensions]).map{|n| str << "\tprop:#{n} #{to_literal(rexp.payload[n].to_ruby[i])} ;\n"}
 					else
-						(options[:measures] & rexp.payload.names).map{|n| str << "\tprop:#{n} #{rexp.payload[n].to_a[i]} ;\n"}
+						((options[:measures] - options[:dimensions]) & rexp.payload.names).map{|n| 
+							str << "\tprop:#{n} #{to_literal(rexp.payload[n].to_ruby[i])} ;\n"
+						}
 					end
 					str << "\t.\n\n"
 					obs << str
 				}
 			end
 			obs
+		end
+
+		def to_resource(obj)
+			if obj.is_a? String
+				#TODO decide the right way to handle missing values, since RDF has no null
+				#probably throw an error here since a missing resource is a bigger problem
+				obj = "null" if obj.empty?
+				
+				#TODO  remove special characters (faster) as well (eg '?')
+				obj.gsub(' ','_').gsub('?','')
+			elsif obj == nil
+				"null"
+			elsif obj.is_a? Numeric
+				#resources cannot be referred to purely by integer (?)
+				"n"+obj.to_s
+			else
+				obj
+			end
+		end
+
+		def to_literal(obj)
+			if obj.is_a? String
+				'"'+obj+'"'
+			elsif obj == nil
+				#TODO decide the right way to handle missing values, since RDF has no null
+				-1
+			else
+				obj
+			end
 		end
   end
 
@@ -217,7 +247,7 @@ module R2RDF
 			component_specifications(rexp, @var, options).map{ |c| str << c }
 			dimension_properties(rexp, @var, options).map{|p| str << p}
 			measure_properties(rexp, @var, options).map{|p| str << p}
-			rows(rexp, @var, options).map{|r| str << r}
+			# rows(rexp, @var, options).map{|r| str << r}
 			observations(rexp, @var, options).map{|o| str << o}
 			str
 		end
