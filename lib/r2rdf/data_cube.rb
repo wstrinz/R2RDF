@@ -10,8 +10,17 @@
 module R2RDF
   # used to generate data cube observations, data structure definitions, etc
   module DataCube
+    def defaults
+      {
+        type: :dataframe,
+        dimensions: ["refRow"],
+        measures: [:all],
+      }
+    end
+
 		def prefixes(options={})
-      type = options[:type] || :dataframe
+      # type = options[:type] || :dataframe
+      options = defaults().merge(options)
 			<<-EOF.unindent
 			@prefix : <http://www.rqtl.org/ns/#> .
 			@prefix qb: <http://purl.org/linked-data/cube#> .
@@ -24,9 +33,10 @@ module R2RDF
 		end
 
     def data_structure_definition(rexp,var,options={})
-      type = options[:type] || :dataframe
+      # type = options[:type] || :dataframe
+      options = defaults().merge(options)
 			str = ":dsd-#{var} a qb:DataStructureDefinition;\n"
-			if type == :dataframe
+			if options[:type] == :dataframe
 				str << "\tqb:component cs:refRow ,\n"
 				#should eventually move these reusable map functions over to
 				#the analyzer class
@@ -44,7 +54,8 @@ module R2RDF
     end
 
 		def dataset(rexp,var,options={})
-      type = options[:type] || :dataframe
+      # type = options[:type] || :dataframe
+      options = defaults().merge(options)
 			<<-EOF.unindent    
 			:dataset-#{@var} a qb:DataSet ;
 				rdfs:label "#{var}"@en ;
@@ -53,18 +64,26 @@ module R2RDF
 			EOF
 		end
 
-		def component_specifications(rexp,var, options={})
-      type = options[:type] || :dataframe
+		def component_specifications(rexp,var,options={})
+      # type = options[:type] || :dataframe
+      options = defaults().merge(options)
 			specs = []
-			if type == :dataframe
-				specs << <<-EOF.unindent 
-				cs:refRow a qb:ComponentSpecification ;
-					rdfs:label "Component Spec for Row" ;
-					qb:dimension prop:refRow .
+			if options[:type] == :dataframe
+				options[:dimensions].map{|d|
+        specs << <<-EOF.unindent
+					cs:#{d} a qb:ComponentSpecification ;
+						rdfs:label "Component Spec for #{d}" ;
+						qb:dimension prop:#{d} .
 
-				EOF
+					EOF
+        }
 				#still needs method for distinguishing measure vs dimension
-				rexp.payload.names.map{|n|
+				if options[:measures].first == :all
+          measures = rexp.payload.names
+        else
+          measures = (rexp.payload.names & options[:measures])
+        end
+        measures.map{|n|
 					specs << <<-EOF.unindent
 						cs:#{n} a qb:ComponentSpecification ;
 							rdfs:label "Component Spec for #{n}" ;
@@ -77,43 +96,73 @@ module R2RDF
 		end
 
 		def dimension_properties(rexp,var,options={})
-      type = options[:type] || :dataframe
+      # type = options[:type] || :dataframe
+      options = defaults().merge(options)
       props = []
-      if type == :dataframe
-  			props << <<-EOF.unindent
-  			:refRow a rdf:Property, qb:DimensionProperty ;
-  				rdfs:label "Row"@en .
-  			
-  			EOF
+      if options[:type] == :dataframe
+  			if options[:dimensions].include? "refRow"
+          props << <<-EOF.unindent
+    			:refRow a rdf:Property, qb:DimensionProperty ;
+    				rdfs:label "Row"@en .
+    			
+    			EOF
+        else
+        	#Keep row for now even if not specified. Remove later to save space.
+          props << <<-EOF.unindent
+          :refRow a rdf:Property;
+            rdfs:label "Row"@en .
+
+          EOF
+        end
+        (options[:dimensions] - ["refRow"]).map{|d|
+          props << <<-EOF.unindent
+          :#{d} a rdf:Property, qb:DimensionProperty ;
+            rdfs:label "#{d}"@en .
+          
+          EOF
+        }
       end
       props
 		end
 
 		def measure_properties(rexp,var,options={})
-      type = options[:type] || :dataframe
+      # type = options[:type] || :dataframe
+      options = defaults().merge(options)
 			props = []
-			if type == :dataframe
-				rexp.payload.names.map{|n|
-					props <<  <<-EOF.unindent
-					:#{n} a rdf:Property, qb:MeasureProperty ;
-						rdfs:label "#{n}"@en .
-				
-					EOF
-         }
+			if options[:type] == :dataframe
+        if options[:measures].first == :all
+  				rexp.payload.names.map{|n|
+  					props <<  <<-EOF.unindent
+  					:#{n} a rdf:Property, qb:MeasureProperty ;
+  						rdfs:label "#{n}"@en .
+  				
+  					EOF
+          }
+        else
+          (options[:measures] & rexp.payload.names).map{ |m|
+            
+            props <<  <<-EOF.unindent
+            :#{m} a rdf:Property, qb:MeasureProperty ;
+              rdfs:label "#{m}"@en .
+          
+            EOF
+          }
+        end
 			end
 			props
 		end
 
 		def rows(rexp, var, options={})
-      type = options[:type] || :dataframe
+      # type = options[:type] || :dataframe
+      options = defaults().merge(options)
 			rows = []
-			if type == :dataframe
+			if options[:type] == :dataframe
         names = rexp.attr.payload["row.names"].to_ruby
         names = 1..rexp.payload.first.to_ruby.size unless names.first
 				names.map{|r|
 					rows << <<-EOF.unindent
-						:#{r} a prop:refRow ;
-							rdfs:label "#{r}" .
+					:#{r} a prop:refRow ;
+						rdfs:label "#{r}" .
 
 					EOF
 				}
@@ -122,18 +171,26 @@ module R2RDF
 		end
 	
 		def observations(rexp, var, options={})	
-      type = options[:type] || :dataframe
+      # type = options[:type] || :dataframe
+      options = defaults().merge(options)
 			obs = []
-			if type == :dataframe
-        names = rexp.attr.payload["row.names"].to_ruby
-        names = 1..rexp.payload.first.to_ruby.size unless names.first
-				names.each_with_index.map{|r, i|
+			if options[:type] == :dataframe
+        row_names = rexp.attr.payload["row.names"].to_ruby
+        row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
+				row_names.each_with_index.map{|r, i|
 					str = <<-EOF.unindent 
 						:obs#{r} a qb:Observation ;
 							qb:dataSet :dataset-#{var} ;
-							prop:refRow :#{r} ;
+							rdfs:label "#{r}" ;
 						EOF
-					rexp.payload.names.map{|n| str << "\tprop:#{n} #{rexp.payload[n].to_a[i]} ;\n"}
+					str << "\tprop:refRow :#{r} ;\n" if options[:dimensions].include? "refRow"
+					#TODO proper naming for dimensions, hopefully using coded properties
+					(options[:dimensions] - ["refRow"]).map{|d| str << "\tprop:#{d} :#{d}#{rexp.payload[d].to_a[i]} ;\n"}
+					if options[:measures].first == :all
+						rexp.payload.names.map{|n| str << "\tprop:#{n} #{rexp.payload[n].to_a[i]} ;\n"}
+					else
+						(options[:measures] & rexp.payload.names).map{|n| str << "\tprop:#{n} #{rexp.payload[n].to_a[i]} ;\n"}
+					end
 					str << "\t.\n\n"
 					obs << str
 				}
@@ -153,15 +210,15 @@ module R2RDF
 			#maybe create client here?
 		end
 
-		def generate_n3(rexp)
+		def generate_n3(rexp,options={})
 			str = prefixes()
-			str << data_structure_definition(rexp,@var)
-			str << dataset(rexp,@var)
-			component_specifications(rexp,@var).map{ |c| str << c }
-			dimension_properties(rexp,@var).map{|p| str << p}
-			measure_properties(rexp,@var).map{|p| str << p}
-			rows(rexp,@var).map{|r| str << r}
-			observations(rexp,@var).map{|o| str << o}
+			str << data_structure_definition(rexp, @var, options)
+			str << dataset(rexp, @var, options)
+			component_specifications(rexp, @var, options).map{ |c| str << c }
+			dimension_properties(rexp, @var, options).map{|p| str << p}
+			measure_properties(rexp, @var, options).map{|p| str << p}
+			rows(rexp, @var, options).map{|r| str << r}
+			observations(rexp, @var, options).map{|o| str << o}
 			str
 		end
 	end

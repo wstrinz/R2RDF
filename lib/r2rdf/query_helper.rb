@@ -14,12 +14,16 @@ module R2RDF
       }
     end
 
-    def get_ary(query,repo,method='to_s')
-      SPARQL.execute(query,repo).map{|solution|
+    def get_ary(response,method='to_s')
+      response.map{|solution|
         solution.to_a.map{|entry|
           entry.last.send(method)
         }
       }
+    end
+
+    def execute(query,repo)
+      SPARQL.execute(query,repo)
     end
 
     def prefixes
