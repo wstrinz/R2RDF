@@ -53,31 +53,31 @@ EOF
 					}
 				end
 
-				it 'has a unique dataset for each observation (IC-1)' do
+				it 'obeys IC-1, has a unique dataset for each observation' do
 					SPARQL.execute(@checks['1'], @graph).first.should be_nil
 				end
 
-				it 'has a unique data structure definition of each dataset (IC-2)' do
+				it 'obeys IC-2, has a unique data structure definition of each dataset' do
 					SPARQL.execute(@checks['2'], @graph).first.should be_nil
 				end
 
-				it 'has a measure property specified for each dataset (IC-3)' do
+				it 'obeys IC-3, has a measure property specified for each dataset' do
 					SPARQL.execute(@checks['3'], @graph).first.should be_nil
 				end
 
-				it 'specifies a range for all dimensions (IC-4)' do
+				it 'obeys IC-4, specifies a range for all dimensions' do
 					SPARQL.execute(@checks['4'], @graph).first.should be_nil
 				end
 
-				it 'has a value for each dimension in every observation (IC-11)' do
+				it 'obeys IC-11, has a value for each dimension in every observation' do
 					SPARQL.execute(@checks['11'], @graph).first.should be_nil
 				end
 
-				it 'has do duplicate observations (IC-12)' do
+				it 'obeys IC-12, has do duplicate observations' do
 					SPARQL.execute(@checks['12'], @graph).first.should be_nil
 				end
 
-				it 'has a value for each measure in every observation (IC-14)' do
+				it 'obeys IC-14, has a value for each measure in every observation' do
 					SPARQL.execute(@checks['14'], @graph).first.should be_nil
 				end
 			end
