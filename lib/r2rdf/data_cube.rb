@@ -37,7 +37,7 @@ module R2RDF
 			EOF
 		end
 
-    def data_structure_definition(rexp,var,options={})
+    def data_structure_definition(components,var,options={})
       # type = options[:type] || :dataframe
       options = defaults().merge(options)
 			str = ":dsd-#{var} a qb:DataStructureDefinition;\n"
@@ -45,7 +45,7 @@ module R2RDF
 				str << "\tqb:component cs:refRow ,\n"
 				#should eventually move these reusable map functions over to
 				#the analyzer class
-				rexp.payload.names.map{|n|
+				components.map{|n|
 							str << "\t\tcs:#{n} ,\n"
 				}
 				str[-2]='.'
@@ -57,8 +57,7 @@ module R2RDF
 			#	class and other attributes
     end
 
-		def dataset(rexp,var,options={})
-      # type = options[:type] || :dataframe
+		def dataset(var,options={})
       options = defaults().merge(options)
 			<<-EOF.unindent    
 			:dataset-#{@var} a qb:DataSet ;
@@ -68,12 +67,11 @@ module R2RDF
 			EOF
 		end
 
-		def component_specifications(rexp,var,options={})
-      # type = options[:type] || :dataframe
+		def component_specifications(measure_names, dimension_names, var, options={})
       options = defaults().merge(options)
 			specs = []
 			if options[:type] == :dataframe
-				options[:dimensions].map{|d|
+				dimension_names.map{|d|
         specs << <<-EOF.unindent
 					cs:#{d} a qb:ComponentSpecification ;
 						rdfs:label "#{d} Component" ;
@@ -81,13 +79,15 @@ module R2RDF
 
 					EOF
         }
-				#still needs method for distinguishing measure vs dimension
-				if options[:measures].first == :all
-          measures = rexp.payload.names - options[:dimensions]
-        else
-          measures = ((rexp.payload.names - options[:dimensions]) & options[:measures])
-        end
-        measures.map{|n|
+				## still needs method for distinguishing measure vs dimension
+				
+				# if options[:measures].first == :all
+    		#   	measures = rexp.payload.names - options[:dimensions]
+    		# else
+    		#   	measures = ((rexp.payload.names - options[:dimensions]) & options[:measures])
+    		# end
+
+        measure_names.map{|n|
 					specs << <<-EOF.unindent
 						cs:#{n} a qb:ComponentSpecification ;
 							rdfs:label "#{n} Component" ;
@@ -99,14 +99,13 @@ module R2RDF
 			specs
 		end
 
-		def dimension_properties(rexp,var,options={})
+		def dimension_properties(dimensions, codes, var, options={})
       # type = options[:type] || :dataframe
       options = defaults().merge(options)
       props = []
       if options[:type] == :dataframe
-        (options[:dimensions]).map{|d|
-          
-          if options[:codes].include?(d)
+        dimensions.map{|d|  
+          if codes.include?(d)
           	props << <<-EOF.unindent
           	prop:#{d} a rdf:Property, qb:DimensionProperty ;
           	  rdfs:label "#{d}"@en ;
@@ -126,21 +125,12 @@ module R2RDF
       props
 		end
 
-		def measure_properties(rexp,var,options={})
+		def measure_properties(measures, var, options={})
       # type = options[:type] || :dataframe
       options = defaults().merge(options)
 			props = []
 			if options[:type] == :dataframe
-        if options[:measures].first == :all
-  				(rexp.payload.names - options[:dimensions]).map{|n|
-  					props <<  <<-EOF.unindent
-  					prop:#{n} a rdf:Property, qb:MeasureProperty ;
-  						rdfs:label "#{n}"@en .
-  				
-  					EOF
-          }
-        else
-          ((options[:measures] - options[:dimensions]) & rexp.payload.names).map{ |m|
+        measures.map{ |m|
             
             props <<  <<-EOF.unindent
             :#{m} a rdf:Property, qb:MeasureProperty ;
@@ -148,7 +138,6 @@ module R2RDF
           
             EOF
           }
-        end
 			end
 			props
 		end
@@ -343,13 +332,41 @@ module R2RDF
 			#maybe create client here?
 		end
 
+		def components(rexp, options)
+
+		end
+
+		def dimensions
+			@options[:dimensions] || ["refRow"]
+		end
+
+		def codes
+			@options[:codes] || ["refRow"]
+		end
+
+		def measures
+			if @options[:dimensions]
+				if @options[:measures]
+					@options[:measures] - @options.dimensions
+				else
+					@rexp.payload.names - @options.dimensions
+				end
+			else
+				@options[:dimensions] || @rexp.payload.names
+			end
+		end
+
+
+
 		def generate_n3(rexp,options={})
+			@rexp = rexp
+			@options = options
 			str = prefixes()
-			str << data_structure_definition(rexp, @var, options)
-			str << dataset(rexp, @var, options)
-			component_specifications(rexp, @var, options).map{ |c| str << c }
-			dimension_properties(rexp, @var, options).map{|p| str << p}
-			measure_properties(rexp, @var, options).map{|p| str << p}
+			str << data_structure_definition(rexp.payload.names, @var, options)
+			str << dataset(@var, options)
+			component_specifications(measures(), dimensions(), @var, options).map{ |c| str << c }
+			dimension_properties(dimensions(), codes(), @var, options).map{|p| str << p}
+			measure_properties(measures(), @var, options).map{|p| str << p}
 			code_lists(rexp, @var, options).map{|l| str << l}
 			concept_codes(rexp, @var, options).map{|c| str << c}
 			# rows(rexp, @var, options).map{|r| str << r}

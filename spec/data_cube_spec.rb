@@ -91,29 +91,29 @@ EOF
 			end
 
 			it 'generates data structure definition' do
-				dsd = @cube.data_structure_definition(@rexp, "mr")
+				dsd = @cube.data_structure_definition(@rexp.payload.names, "mr")
 				dsd.is_a?(String).should == true
 			end
 
 			it 'generates dataset' do
-				dsd = @cube.dataset(@rexp, "mr")
+				dsd = @cube.dataset("mr")
 				dsd.is_a?(String).should == true
 			end
 
 			it 'generates component specifications' do
-				components = @cube.component_specifications(@rexp, "mr")
+				components = @cube.component_specifications(@rexp.payload.names, ["refRow"], "mr")
 				components.is_a?(Array).should == true
 				components.first.is_a?(String).should == true
 			end
 
 			it 'generates dimension properties' do
-				dimensions = @cube.dimension_properties(@rexp, "mr")
+				dimensions = @cube.dimension_properties(["refRow"],["refRow"],"mr")
 				dimensions.is_a?(Array).should == true
 				dimensions.first.is_a?(String).should == true
 			end
 
 			it 'generates measure properties' do
-				measures = @cube.measure_properties(@rexp, "mr")
+				measures = @cube.measure_properties(@rexp.payload.names, "mr")
 				measures.is_a?(Array).should == true
 				measures.first.is_a?(String).should == true
 			end
