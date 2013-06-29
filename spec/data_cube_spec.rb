@@ -54,31 +54,31 @@ EOF
 				end
 
 				it 'has a unique dataset for each observation (IC-1)' do
-					SPARQL.execute(@checks['1'], @graph).size.should == 0
+					SPARQL.execute(@checks['1'], @graph).first.should be_nil
 				end
 
 				it 'has a unique data structure definition of each dataset (IC-2)' do
-					SPARQL.execute(@checks['2'], @graph).size.should == 0
+					SPARQL.execute(@checks['2'], @graph).first.should be_nil
 				end
 
 				it 'has a measure property specified for each dataset (IC-3)' do
-					SPARQL.execute(@checks['3'], @graph).size.should == 0
+					SPARQL.execute(@checks['3'], @graph).first.should be_nil
 				end
 
 				it 'specifies a range for all dimensions (IC-4)' do
-					SPARQL.execute(@checks['4'], @graph).size.should == 0
+					SPARQL.execute(@checks['4'], @graph).first.should be_nil
 				end
 
 				it 'has a value for each dimension in every observation (IC-11)' do
-					SPARQL.execute(@checks['11'], @graph).size.should == 0
+					SPARQL.execute(@checks['11'], @graph).first.should be_nil
 				end
 
 				it 'has do duplicate observations (IC-12)' do
-					SPARQL.execute(@checks['12'], @graph).size.should == 0
+					SPARQL.execute(@checks['12'], @graph).first.should be_nil
 				end
 
 				it 'has a value for each measure in every observation (IC-14)' do
-					SPARQL.execute(@checks['14'], @graph).size.should == 0
+					SPARQL.execute(@checks['14'], @graph).first.should be_nil
 				end
 			end
 		end
