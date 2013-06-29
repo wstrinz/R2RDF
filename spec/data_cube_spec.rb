@@ -37,7 +37,7 @@ EOF
 				graph.size.should > 0
 			end
 
-			context 'official W3C integrity checks' do
+			context 'under official W3C integrity constraints' do
 				before(:all) do
 					@checks = {}
 					Dir.foreach(File.dirname(__FILE__) + '/queries/integrity') do |file|
