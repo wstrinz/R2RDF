@@ -42,9 +42,7 @@ EOF
 					@checks = {}
 					Dir.foreach(File.dirname(__FILE__) + '/queries/integrity') do |file|
 						if file.split('.').last == 'rq'
-							query = ""
-							open(File.dirname(__FILE__) + '/queries/integrity/' + file){|f| f.each_line{|l| query << l}}
-							@checks[file.split('.').first] = query
+							@checks[file.split('.').first] = IO.read(File.dirname(__FILE__) + '/queries/integrity/' + file)
 						end
 					end
 					@graph = RDF::Graph.new
