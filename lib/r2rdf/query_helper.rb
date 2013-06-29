@@ -72,6 +72,8 @@ SELECT DISTINCT ?label WHERE {
 }
       EOS
     end
+
+    def 
   end
 
   class QueryHelper

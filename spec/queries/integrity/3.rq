@@ -1,0 +1,19 @@
+PREFIX :     <http://www.rqtl.org/ns/#> 
+PREFIX qb:   <http://purl.org/linked-data/cube#> 
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX prop: <http://www.rqtl.org/dc/properties/> 
+PREFIX cs:   <http://www.rqtl.org/dc/cs/>
+
+# IC-3. DSD includes measure (modified)
+
+SELECT * WHERE {
+  ?dsd a qb:DataStructureDefinition ;
+  
+  FILTER NOT EXISTS {
+  	#original spec missing this definition
+    { ?dsd qb:component [qb:measure []] }
+    UNION
+    { ?dsd qb:component [qb:componentProperty [a qb:MeasureProperty]] }
+  }
+}

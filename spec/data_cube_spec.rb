@@ -4,9 +4,8 @@ require_relative '../lib/r2rdf/r_builder.rb'
 
 
 describe R2RDF::Cube do
-	
 	context "when using r/qtl dataframe" do
-		before(:each) do 
+		before(:all) do 
 			@r = Rserve::Connection.new
 			@r.eval <<-EOF
 				library(qtl)
@@ -14,26 +13,120 @@ describe R2RDF::Cube do
 				mr = scanone(listeria,method="mr")
 EOF
 			@rexp = @r.eval 'mr'
-			@cube = R2RDF::Cube.new('mr')
-
 		end
 
+
 		it "generates rdf from scanone result" do
-			turtle_string = @cube.generate_n3(@rexp)
+			cube = R2RDF::Cube.new('mr')
+			turtle_string = cube.generate_n3(@rexp)
 			turtle_string.should_not == nil 
 		end
 
-		it "generates valid turtle syntax" do
-			turtle_string = @cube.generate_n3(@rexp)
-			graph = RDF::Graph.new
-			RDF::Reader.for(:turtle).new(turtle_string) {|r|
-				r.each_statement{|st| graph.insert st}
-			}
-			graph.size.should > 0
+		context 'output validity' do
+
+			before(:all) do
+				@cube = R2RDF::Cube.new('mr')
+				@turtle = @cube.generate_n3(@rexp)
+			end
+
+			it "generates valid turtle syntax" do
+				graph = RDF::Graph.new
+				RDF::Reader.for(:turtle).new(@turtle) {|r|
+					r.each_statement{|st| graph.insert st}
+				}
+				graph.size.should > 0
+			end
+
+			context 'official W3C integrity checks' do
+				before(:all) do
+					@checks = {}
+					Dir.foreach(File.dirname(__FILE__) + '/queries/integrity') do |file|
+						if file.split('.').last == 'rq'
+							query = ""
+							open(File.dirname(__FILE__) + '/queries/integrity/' + file){|f| f.each_line{|l| query << l}}
+							@checks[file.split('.').first] = query
+						end
+					end
+					@graph = RDF::Graph.new
+					RDF::Reader.for(:turtle).new(@turtle) {|r|
+						r.each_statement{|st| @graph.insert st}
+					}
+				end
+
+				it 'has a unique dataset for each observation (IC-1)' do
+					SPARQL.execute(@checks['1'], @graph).size.should == 0
+				end
+
+				it 'has a unique data structure definition of each dataset (IC-2)' do
+					SPARQL.execute(@checks['2'], @graph).size.should == 0
+				end
+
+				it 'has a measure property specified for each dataset (IC-3)' do
+					SPARQL.execute(@checks['3'], @graph).size.should == 0
+				end
+
+				it 'specifies a range for all dimensions (IC-4)' do
+					SPARQL.execute(@checks['4'], @graph).size.should == 0
+				end
+
+				it 'has a value for each dimension in every observation (IC-11)' do
+					SPARQL.execute(@checks['11'], @graph).size.should == 0
+				end
+
+				it 'has do duplicate observations (IC-12)' do
+					SPARQL.execute(@checks['12'], @graph).size.should == 0
+				end
+
+				it 'has a value for each measure in every observation (IC-14)' do
+					SPARQL.execute(@checks['14'], @graph).size.should == 0
+				end
+			end
 		end
 
-		it "generates valitd Data Cube format rdf" do
+		context 'Functional R to vocabulary element generation' do
+			before(:all) do
+				@cube = R2RDF::Cube.new('mr')
+				@turtle = @cube.generate_n3(@rexp)
+			end
 
+			it 'generates prefixes' do
+				prefixes = @cube.prefixes
+				prefixes.is_a?(String).should == true
+			end
+
+			it 'generates data structure definition' do
+				dsd = @cube.data_structure_definition(@rexp, "mr")
+				dsd.is_a?(String).should == true
+			end
+
+			it 'generates dataset' do
+				dsd = @cube.dataset(@rexp, "mr")
+				dsd.is_a?(String).should == true
+			end
+
+			it 'generates component specifications' do
+				components = @cube.component_specifications(@rexp, "mr")
+				components.is_a?(Array).should == true
+				components.first.is_a?(String).should == true
+			end
+
+			it 'generates dimension properties' do
+				dimensions = @cube.dimension_properties(@rexp, "mr")
+				dimensions.is_a?(Array).should == true
+				dimensions.first.is_a?(String).should == true
+			end
+
+			it 'generates measure properties' do
+				measures = @cube.measure_properties(@rexp, "mr")
+				measures.is_a?(Array).should == true
+				measures.first.is_a?(String).should == true
+			end
+
+			it 'generates observations' do
+				observations = @cube.observations(@rexp, "mr")
+				observations.is_a?(Array).should == true
+				observations.first.is_a?(String).should == true
+			end
 		end
 
 		it "can set dimensions vs measures via hash" do
