@@ -5,13 +5,8 @@ require_relative '../lib/r2rdf/r_builder.rb'
 
 describe R2RDF::Cube do
 	context "when using r/qtl dataframe" do
-		it "generates rdf from scanone result" do
-			cube = R2RDF::Cube.new('mr')
-			turtle_string = cube.generate_n3(@rexp)
-			turtle_string.should_not == nil 
-		end
 
-		before do 
+		before(:all) do 
 			@r = Rserve::Connection.new
 			@r.eval <<-EOF
 				library(qtl)
@@ -21,6 +16,12 @@ EOF
 			@rexp = @r.eval 'mr'
 			@cube = R2RDF::Cube.new('mr')
 			@turtle = @cube.generate_n3(@rexp)
+		end
+		
+		it "generates rdf from scanone result" do
+			cube = R2RDF::Cube.new('mr')
+			turtle_string = cube.generate_n3(@rexp)
+			turtle_string.should_not == nil 
 		end
 
 		
@@ -79,7 +80,7 @@ EOF
 			end
 		end
 
-		describe 'Functional R to vocabulary element generation' do
+		describe 'Functional R to vocabulary element' do
 			# before(:all) do
 			# 	@cube = R2RDF::Cube.new('mr')
 			# 	@turtle = @cube.generate_n3(@rexp)
@@ -119,7 +120,13 @@ EOF
 			end
 
 			it 'generates observations' do
-				observations = @cube.observations(@rexp, "mr")
+				#measures, dimensions, codes, var, observation_labels, data, options={}
+				data = {}
+				@rexp.payload.names.map{|name|
+					data[name] = @rexp.payload[name].to_ruby
+				}
+				data["refRow"] = @rexp.attr.payload["row.names"].to_ruby
+				observations = @cube.observations(@rexp.payload.names, ["refRow"], ["refRow"], "mr", @rexp.attr.payload["row.names"].to_ruby, data)
 				observations.is_a?(Array).should == true
 				observations.first.is_a?(String).should == true
 			end

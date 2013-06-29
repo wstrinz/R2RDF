@@ -143,7 +143,6 @@ module R2RDF
 		end
 
 		def rows(rexp, var, options={})
-      # type = options[:type] || :dataframe
       options = defaults().merge(options)
 			rows = []
 			if options[:type] == :dataframe
@@ -160,41 +159,47 @@ module R2RDF
 			rows
 		end
 	
-		def observations(rexp, var, options={})	
-      # type = options[:type] || :dataframe
+		def observations(measures, dimensions, codes, var, observation_labels, data, options={})	
       options = defaults().merge(options)
 			obs = []
+			# puts data
+			# puts data.class
 			if options[:type] == :dataframe
-        row_names = rexp.attr.payload["row.names"].to_ruby
-        row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
-				row_names.each_with_index.map{|r, i|
+        
+				observation_labels.each_with_index.map{|r, i|
 					str = <<-EOF.unindent 
 						:obs#{r} a qb:Observation ;
 							qb:dataSet :dataset-#{var} ;
 							rdfs:label "#{r}" ;
 						EOF
 					
-					if(options[:codes].include? "refRow")
-						str << "\tprop:refRow code:row_#{r} ;\n" if options[:dimensions].include? "refRow"
-					else
-						str << "\tprop:refRow :#{r} ;\n" if options[:dimensions].include? "refRow"
-					end
+					# if(options[:codes].include? "refRow")
+					# 	str << "\tprop:refRow code:row_#{r} ;\n" if options[:dimensions].include? "refRow"
+					# else
+					# 	str << "\tprop:refRow :#{r} ;\n" if options[:dimensions].include? "refRow"
+					# end
 
 					#TODO proper naming for dimensions, hopefully using coded properties
-					(options[:dimensions] - ["refRow"]).map{|d|
-						if options[:codes].include? d
-							str << "\tprop:#{d} code:#{d.downcase}_#{rexp.payload[d].to_ruby[i]} ;\n"
+					# puts dimensions
+					# puts data.names
+					dimensions.map{|d|
+						if codes.include? d
+							str << "\tprop:#{d} code:#{d.downcase}_#{data[d][i]} ;\n"
 						else
-							str << "\tprop:#{d} :#{to_resource(rexp.payload[d].to_ruby[i])} ;\n"
+							str << "\tprop:#{d} :#{to_resource(data[d][i])} ;\n"
 						end
 					}
-					if options[:measures].first == :all
-						(rexp.payload.names - options[:dimensions]).map{|n| str << "\tprop:#{n} #{to_literal(rexp.payload[n].to_ruby[i])} ;\n"}
-					else
-						((options[:measures] - options[:dimensions]) & rexp.payload.names).map{|n| 
-							str << "\tprop:#{n} #{to_literal(rexp.payload[n].to_ruby[i])} ;\n"
-						}
-					end
+
+					measures.map{|m|
+						str << "\tprop:#{m} #{to_literal(data[m][i])} ;\n"
+					}
+					# if options[:measures].first == :all
+					# 	(rexp.payload.names - options[:dimensions]).map{|n| str << "\tprop:#{n} #{to_literal(rexp.payload[n].to_ruby[i])} ;\n"}
+					# else
+					# 	((options[:measures] - options[:dimensions]) & rexp.payload.names).map{|n| 
+					# 		str << "\tprop:#{n} #{to_literal(rexp.payload[n].to_ruby[i])} ;\n"
+					# 	}
+					# end
 					str << "\t.\n\n"
 					obs << str
 				}
@@ -202,36 +207,36 @@ module R2RDF
 			obs
 		end
 
-		def code_lists(rexp, var, options={})
+		def code_lists(codes, data, var, options={})
 			options = defaults().merge(options)
-			codes = []
+			lists = []
 			if options[:type] == :dataframe
-				if options[:codes].include? "refRow"
-					str = <<-EOF.unindent
-						code:Refrow a rdfs:Class, owl:Class;
-							rdfs:subClassOf skos:Concept ;
-							rdfs:label "Code list for refRow - codelist class"@en ;
-							rdfs:comment "Specifies the refRow for each observation";
-							rdfs:seeAlso code:refrow.
+			# 	if codes.include? "refRow"
+			# 		str = <<-EOF.unindent
+			# 			code:Refrow a rdfs:Class, owl:Class;
+			# 				rdfs:subClassOf skos:Concept ;
+			# 				rdfs:label "Code list for refRow - codelist class"@en ;
+			# 				rdfs:comment "Specifies the refRow for each observation";
+			# 				rdfs:seeAlso code:refrow.
 
-						code:refrow a skos:ConceptScheme;
-							skos:prefLabel "Code list for refRow - codelist scheme"@en;
-							rdfs:label "Code list for refRow - codelist scheme"@en;
-							skos:notation "CL_REFROW";
-							skos:note "Specifies the refRow for each observation";
-					EOF
-					row_names = rexp.attr.payload["row.names"].to_ruby
-        	row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
-					row_names.map{|row|
-						str << "\tskos:hasTopConcept code:refrow_#{row} ;\n"
-					}
-					str << "\t.\n"
-					codes << str
-				end
+			# 			code:refrow a skos:ConceptScheme;
+			# 				skos:prefLabel "Code list for refRow - codelist scheme"@en;
+			# 				rdfs:label "Code list for refRow - codelist scheme"@en;
+			# 				skos:notation "CL_REFROW";
+			# 				skos:note "Specifies the refRow for each observation";
+			# 		EOF
+			# 		# row_names = rexp.attr.payload["row.names"].to_ruby
+   #   			#	row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
+			# 		row_names.map{|row|
+			# 			str << "\tskos:hasTopConcept code:refrow_#{row} ;\n"
+			# 		}
+			# 		str << "\t.\n"
+			# 		codes << str
+			# 	end
         
         
-        code_cols = (options[:codes] & rexp.payload.names)
-        code_cols.map{|code|
+   #      code_cols = (options[:codes] & rexp.payload.names)
+        codes.map{|code|
         	# include skos:definition?
         	str = <<-EOF.unindent
 						code:#{code.downcase.capitalize} a rdfs:Class, owl:Class;
@@ -246,38 +251,38 @@ module R2RDF
 							skos:notation "CL_#{code.upcase}";
 							skos:note "Specifies the #{code} for each observation";
         	EOF
-        	rexp.payload[code].to_ruby.uniq.map{|value|
+        	data[code].uniq.map{|value|
         		str << "\tskos:hasTopConcept code:#{code.downcase}_#{value} ;\n"
         	}
         	str <<"\t.\n\n"
-        	codes << str
+        	lists << str
         }
 			end
 
-			codes
+			lists
 		end
 
-		def concept_codes(rexp, var, options={})
+		def concept_codes(codes, data, var, options={})
 			options = defaults().merge(options)
-			codes = []
+			concepts = []
 			if options[:type] == :dataframe
-				if options[:codes].include? "refRow"
-					row_names = rexp.attr.payload["row.names"].to_ruby
-	        row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
-					row_names.map{|row|
-        		codes << <<-EOF.unindent
-	        		code:refrow_#{row} a skos:Concept, code:Refrow;
-	        			skos:topConceptOf code:refrow ;
-	        			skos:prefLabel "#{row}" ;
-	        			skos:inScheme code:refrow .
+				# if options[:codes].include? "refRow"
+				# 	row_names = rexp.attr.payload["row.names"].to_ruby
+	   #      row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
+				# 	row_names.map{|row|
+    #     		codes << <<-EOF.unindent
+	   #      		code:refrow_#{row} a skos:Concept, code:Refrow;
+	   #      			skos:topConceptOf code:refrow ;
+	   #      			skos:prefLabel "#{row}" ;
+	   #      			skos:inScheme code:refrow .
 
-        		EOF
-	        }
-				end
-        code_cols = (options[:codes] & rexp.payload.names)
-        code_cols.map{|code|
-        	rexp.payload[code].to_ruby.uniq.map{|value|
-        	codes << <<-EOF.unindent
+    #     		EOF
+	   #      }
+				# end
+        # code_cols = (options[:codes] & rexp.payload.names)
+        codes.map{|code|
+        	data[code].uniq.map{|value|
+        	concepts << <<-EOF.unindent
         		code:#{code.downcase}_#{value} a skos:Concept, code:#{code.downcase.capitalize};
         			skos:topConceptOf code:#{code.downcase} ;
         			skos:prefLabel "#{value}" ;
@@ -288,7 +293,7 @@ module R2RDF
         }
 			end
 
-			codes
+			concepts
 		end
 
 		def to_resource(obj)
@@ -356,7 +361,25 @@ module R2RDF
 			end
 		end
 
+		def observation_labels
+			row_names = @rexp.attr.payload["row.names"].to_ruby
+      row_names = 1..@rexp.payload.first.to_ruby.size unless row_names.first
+      row_names
+		end
 
+		def observation_data
+
+			## apparently you can't easily add to an Rexp...
+
+			data = {}
+			@rexp.payload.names.map{|name|
+				data[name] = @rexp.payload[name].to_ruby
+			}
+			data["refRow"] = observation_labels()
+			data
+		end
+
+		#measures, dimensions, codes, var, observation_labels, data, options={}
 
 		def generate_n3(rexp,options={})
 			@rexp = rexp
@@ -367,10 +390,10 @@ module R2RDF
 			component_specifications(measures(), dimensions(), @var, options).map{ |c| str << c }
 			dimension_properties(dimensions(), codes(), @var, options).map{|p| str << p}
 			measure_properties(measures(), @var, options).map{|p| str << p}
-			code_lists(rexp, @var, options).map{|l| str << l}
-			concept_codes(rexp, @var, options).map{|c| str << c}
+			code_lists(codes(), observation_data(), @var, options).map{|l| str << l}
+			concept_codes(codes(), observation_data(), @var, options).map{|c| str << c}
 			# rows(rexp, @var, options).map{|r| str << r}
-			observations(rexp, @var, options).map{|o| str << o}
+			observations(measures(), dimensions(), codes(), @var, observation_labels(), observation_data(), options).map{|o| str << o}
 			str
 		end
 	end
