@@ -17,7 +17,11 @@ module R2RDF
     def get_ary(response,method='to_s')
       response.map{|solution|
         solution.to_a.map{|entry|
-          entry.last.send(method)
+          if entry.last.respond_to? method
+	          entry.last.send(method)
+	        else
+	        	entry.last.to_s
+	        end
         }
       }
     end
@@ -34,6 +38,7 @@ PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 PREFIX prop: <http://www.rqtl.org/dc/properties/> 
 PREFIX cs:   <http://www.rqtl.org/dc/cs/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
 
       EOF
     end
@@ -44,8 +49,6 @@ PREFIX cs:   <http://www.rqtl.org/dc/cs/>
 SELECT ?val WHERE {
   ?obs qb:dataSet :dataset-#{var} ;
       prop:#{property} ?val ;
-      prop:refRow ?row .
-  ?row rdfs:label ?label .
 }
       EOS
       str
@@ -57,7 +60,7 @@ SELECT ?val WHERE {
 SELECT ?label WHERE {
   ?obs qb:dataSet :dataset-#{var} ;
        prop:refRow ?row .
-  ?row rdfs:label ?label .
+  ?row skos:prefLabel ?label .
 }
       EOS
     end

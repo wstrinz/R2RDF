@@ -22,24 +22,30 @@ module R2RDF
 		def get_vars(connection)
 			connection.eval("ls()")
 		end
+
 	end 
 
 	class Client
 		include R2RDF::Rconnect
     attr :R
     
-		def initialize(auto=true)
+		def initialize(auto=true, loc=Dir.home)
       @R = connect
+			@loc = loc
 			load_ws if auto
 			puts "vars: #{vars.payload}" if auto
 		end
 
 		def load_ws
-			load_workspace(@R)
+			load_workspace(@R, @loc)
 		end
 
 		def get_var(var)
 			get(@R,var)
+		end
+
+		def get_ws
+			"#{@loc}/.RData"
 		end
 
 		def vars

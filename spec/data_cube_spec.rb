@@ -126,7 +126,7 @@ EOF
 					data[name] = @rexp.payload[name].to_ruby
 				}
 				data["refRow"] = @rexp.attr.payload["row.names"].to_ruby
-				observations = @cube.observations(@rexp.payload.names, ["refRow"], ["refRow"], "mr", @rexp.attr.payload["row.names"].to_ruby, data)
+				observations = @cube.observations(@rexp.payload.names, ["refRow"], ["refRow"], data, @rexp.attr.payload["row.names"].to_ruby, "mr")
 				observations.is_a?(Array).should == true
 				observations.first.is_a?(String).should == true
 			end

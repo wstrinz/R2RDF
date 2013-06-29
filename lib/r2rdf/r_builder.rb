@@ -13,10 +13,10 @@ module R2RDF
     end
     
     def get_vectors(variable_name, helper, repo)
-      column_names = helper.get_ary(helper.execute(helper.property_names(variable_name), repo)).flatten.map{|n| n.gsub('Component Spec for ','')}
+      column_names = helper.get_ary(helper.execute(helper.property_names(variable_name), repo)).flatten.map{|n| n.gsub(' Component','')}
       vectors = {}
       column_names.map{|n| 
-        vectors[n] = helper.get_ary(helper.execute(helper.property_values(variable_name,n),repo),'to_f').flatten unless n == "Row"
+        vectors[n] = helper.get_ary(helper.execute(helper.property_values(variable_name,n),repo),'to_f').flatten unless n == "refRow"
       }
       vectors
     end
@@ -30,26 +30,37 @@ module R2RDF
       connection.eval("row.names(#{name}) <- rows")
       connection.eval(name)
     end
+
+    def save_workspace(connection, loc)
+    	puts loc
+    	connection.eval "save.image(#{loc})"
+    end
+
   end
 
   class Builder
     include R2RDF::Rbuilder
 
 
-    def from_turtle(turtle_file,variable_name=nil,verbose=true)
-      unless variable_name
+    def from_turtle(turtle_file,variable_in=nil, variable_out=nil, verbose=true, save=true)
+      unless variable_in && variable_out
         puts "no variable specified. Simple inference coming soon" if verbose
         return
       end
       puts "loading #{turtle_file}" if verbose
       repo = RDF::Repository.load(turtle_file)
-      puts "loaded #{repo.size} statements into new repo" if verbose
+      puts "loaded #{repo.size} statements into temporary repo" if verbose
+
       client = R2RDF::Client.new
       query = R2RDF::QueryHelper.new
-      rows = query.get_ary(query.execute(query.row_names(variable_name), repo)).flatten
-      vectors = get_vectors(variable_name, query, repo)
+      rows = query.get_ary(query.execute(query.row_names(variable_in), repo)).flatten
+      puts "frame has #{rows.size} rows" if verbose
+
+      vectors = get_vectors(variable_in, query, repo)
       puts "got vectors of size #{vectors.first.last.size}" if verbose && vectors.first
-      create_dataframe(variable_name, client.R, rows, vectors)
+
+      create_dataframe(variable_out, client.R, rows, vectors)
+      save_workspace(client.R, client.get_ws) if save
     end
 
     def from_store(store_uri,variable)

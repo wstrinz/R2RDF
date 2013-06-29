@@ -20,7 +20,6 @@ module R2RDF
     end
 
 		def prefixes(options={})
-      # type = options[:type] || :dataframe
       options = defaults().merge(options)
 			<<-EOF.unindent
 			@prefix : <http://www.rqtl.org/ns/#> .
@@ -38,13 +37,10 @@ module R2RDF
 		end
 
     def data_structure_definition(components,var,options={})
-      # type = options[:type] || :dataframe
       options = defaults().merge(options)
 			str = ":dsd-#{var} a qb:DataStructureDefinition;\n"
 			if options[:type] == :dataframe
 				str << "\tqb:component cs:refRow ,\n"
-				#should eventually move these reusable map functions over to
-				#the analyzer class
 				components.map{|n|
 							str << "\t\tcs:#{n} ,\n"
 				}
@@ -79,13 +75,6 @@ module R2RDF
 
 					EOF
         }
-				## still needs method for distinguishing measure vs dimension
-				
-				# if options[:measures].first == :all
-    		#   	measures = rexp.payload.names - options[:dimensions]
-    		# else
-    		#   	measures = ((rexp.payload.names - options[:dimensions]) & options[:measures])
-    		# end
 
         measure_names.map{|n|
 					specs << <<-EOF.unindent
@@ -100,7 +89,6 @@ module R2RDF
 		end
 
 		def dimension_properties(dimensions, codes, var, options={})
-      # type = options[:type] || :dataframe
       options = defaults().merge(options)
       props = []
       if options[:type] == :dataframe
@@ -126,7 +114,6 @@ module R2RDF
 		end
 
 		def measure_properties(measures, var, options={})
-      # type = options[:type] || :dataframe
       options = defaults().merge(options)
 			props = []
 			if options[:type] == :dataframe
@@ -142,28 +129,9 @@ module R2RDF
 			props
 		end
 
-		def rows(rexp, var, options={})
-      options = defaults().merge(options)
-			rows = []
-			if options[:type] == :dataframe
-        names = rexp.attr.payload["row.names"].to_ruby
-        names = 1..rexp.payload.first.to_ruby.size unless names.first
-				names.map{|r|
-					rows << <<-EOF.unindent
-					:#{r} a prop:refRow ;
-						rdfs:label "#{r}" .
-
-					EOF
-				}
-			end
-			rows
-		end
-	
-		def observations(measures, dimensions, codes, var, observation_labels, data, options={})	
+		def observations(measures, dimensions, codes, data, observation_labels, var, options={})	
       options = defaults().merge(options)
 			obs = []
-			# puts data
-			# puts data.class
 			if options[:type] == :dataframe
         
 				observation_labels.each_with_index.map{|r, i|
@@ -171,17 +139,8 @@ module R2RDF
 						:obs#{r} a qb:Observation ;
 							qb:dataSet :dataset-#{var} ;
 							rdfs:label "#{r}" ;
-						EOF
+					EOF
 					
-					# if(options[:codes].include? "refRow")
-					# 	str << "\tprop:refRow code:row_#{r} ;\n" if options[:dimensions].include? "refRow"
-					# else
-					# 	str << "\tprop:refRow :#{r} ;\n" if options[:dimensions].include? "refRow"
-					# end
-
-					#TODO proper naming for dimensions, hopefully using coded properties
-					# puts dimensions
-					# puts data.names
 					dimensions.map{|d|
 						if codes.include? d
 							str << "\tprop:#{d} code:#{d.downcase}_#{data[d][i]} ;\n"
@@ -193,13 +152,7 @@ module R2RDF
 					measures.map{|m|
 						str << "\tprop:#{m} #{to_literal(data[m][i])} ;\n"
 					}
-					# if options[:measures].first == :all
-					# 	(rexp.payload.names - options[:dimensions]).map{|n| str << "\tprop:#{n} #{to_literal(rexp.payload[n].to_ruby[i])} ;\n"}
-					# else
-					# 	((options[:measures] - options[:dimensions]) & rexp.payload.names).map{|n| 
-					# 		str << "\tprop:#{n} #{to_literal(rexp.payload[n].to_ruby[i])} ;\n"
-					# 	}
-					# end
+
 					str << "\t.\n\n"
 					obs << str
 				}
@@ -211,33 +164,7 @@ module R2RDF
 			options = defaults().merge(options)
 			lists = []
 			if options[:type] == :dataframe
-			# 	if codes.include? "refRow"
-			# 		str = <<-EOF.unindent
-			# 			code:Refrow a rdfs:Class, owl:Class;
-			# 				rdfs:subClassOf skos:Concept ;
-			# 				rdfs:label "Code list for refRow - codelist class"@en ;
-			# 				rdfs:comment "Specifies the refRow for each observation";
-			# 				rdfs:seeAlso code:refrow.
-
-			# 			code:refrow a skos:ConceptScheme;
-			# 				skos:prefLabel "Code list for refRow - codelist scheme"@en;
-			# 				rdfs:label "Code list for refRow - codelist scheme"@en;
-			# 				skos:notation "CL_REFROW";
-			# 				skos:note "Specifies the refRow for each observation";
-			# 		EOF
-			# 		# row_names = rexp.attr.payload["row.names"].to_ruby
-   #   			#	row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
-			# 		row_names.map{|row|
-			# 			str << "\tskos:hasTopConcept code:refrow_#{row} ;\n"
-			# 		}
-			# 		str << "\t.\n"
-			# 		codes << str
-			# 	end
-        
-        
-   #      code_cols = (options[:codes] & rexp.payload.names)
-        codes.map{|code|
-        	# include skos:definition?
+			    codes.map{|code|
         	str = <<-EOF.unindent
 						code:#{code.downcase.capitalize} a rdfs:Class, owl:Class;
 							rdfs:subClassOf skos:Concept ;
@@ -266,20 +193,6 @@ module R2RDF
 			options = defaults().merge(options)
 			concepts = []
 			if options[:type] == :dataframe
-				# if options[:codes].include? "refRow"
-				# 	row_names = rexp.attr.payload["row.names"].to_ruby
-	   #      row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
-				# 	row_names.map{|row|
-    #     		codes << <<-EOF.unindent
-	   #      		code:refrow_#{row} a skos:Concept, code:Refrow;
-	   #      			skos:topConceptOf code:refrow ;
-	   #      			skos:prefLabel "#{row}" ;
-	   #      			skos:inScheme code:refrow .
-
-    #     		EOF
-	   #      }
-				# end
-        # code_cols = (options[:codes] & rexp.payload.names)
         codes.map{|code|
         	data[code].uniq.map{|value|
         	concepts << <<-EOF.unindent
@@ -333,10 +246,6 @@ module R2RDF
 			@var = var
 		end
 
-		def rexp
-			#maybe create client here?
-		end
-
 		def components(rexp, options)
 
 		end
@@ -370,6 +279,7 @@ module R2RDF
 		def observation_data
 
 			## apparently you can't easily add to an Rexp...
+			## probably would be good to figure a way in the future, but for now this works
 
 			data = {}
 			@rexp.payload.names.map{|name|
@@ -378,8 +288,6 @@ module R2RDF
 			data["refRow"] = observation_labels()
 			data
 		end
-
-		#measures, dimensions, codes, var, observation_labels, data, options={}
 
 		def generate_n3(rexp,options={})
 			@rexp = rexp
@@ -392,8 +300,7 @@ module R2RDF
 			measure_properties(measures(), @var, options).map{|p| str << p}
 			code_lists(codes(), observation_data(), @var, options).map{|l| str << l}
 			concept_codes(codes(), observation_data(), @var, options).map{|c| str << c}
-			# rows(rexp, @var, options).map{|r| str << r}
-			observations(measures(), dimensions(), codes(), @var, observation_labels(), observation_data(), options).map{|o| str << o}
+			observations(measures(), dimensions(), codes(), observation_data(), observation_labels(), @var, options).map{|o| str << o}
 			str
 		end
 	end
