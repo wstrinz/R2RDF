@@ -1,0 +1,15 @@
+PREFIX :     <http://www.rqtl.org/ns/#> 
+PREFIX qb:   <http://purl.org/linked-data/cube#> 
+PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX prop: <http://www.rqtl.org/dc/properties/> 
+PREFIX cs:   <http://www.rqtl.org/dc/cs/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+
+# IC-5. Concept dimensions have code lists
+
+SELECT * WHERE {
+  ?dim a qb:DimensionProperty ;
+       rdfs:range skos:Concept .
+  #FILTER NOT EXISTS { ?dim qb:codeList [] }
+}
