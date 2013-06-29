@@ -14,6 +14,7 @@ module R2RDF
       {
         type: :dataframe,
         dimensions: ["refRow"],
+        codes: ["refRow"],
         measures: [:all],
       }
     end
@@ -28,7 +29,11 @@ module R2RDF
 			@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 			@prefix prop: <http://www.rqtl.org/dc/properties/> .
 			@prefix cs: <http://www.rqtl.org/dc/cs/> .
-						
+			@prefix code: <http://www.rqtl.org/dc/code/> .
+			@prefix class: <http://www.rqtl.org/dc/class/> .
+			@prefix owl: <http://www.w3.org/2002/07/owl#> .
+			@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
 			EOF
 		end
 
@@ -114,11 +119,22 @@ module R2RDF
           EOF
         end
         (options[:dimensions] - ["refRow"]).map{|d|
-          props << <<-EOF.unindent
-          prop:#{d} a rdf:Property, qb:DimensionProperty ;
-            rdfs:label "#{d}"@en .
           
-          EOF
+          if options[:codes].include?(d)
+          	props << <<-EOF.unindent
+          	prop:#{d} a rdf:Property, qb:DimensionProperty ;
+          	  rdfs:label "#{d}"@en ;
+          	  qb:codeList code:#{d.downcase} ;
+          	  rdfs:range code:#{d.downcase.capitalize} .
+
+          	EOF
+          else
+	          props << <<-EOF.unindent
+	          prop:#{d} a rdf:Property, qb:DimensionProperty ;
+	            rdfs:label "#{d}"@en .
+	            
+	          EOF
+          end
         }
       end
       props
@@ -199,6 +215,62 @@ module R2RDF
 			obs
 		end
 
+		def code_lists(rexp, var, options={})
+			options = defaults().merge(options)
+			codes = []
+			if options[:type] == :dataframe
+				row_names = rexp.attr.payload["row.names"].to_ruby
+        row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
+        code_rows = (options[:codes] & row_names) || row_names
+        code_rows.map{|code|
+        	# include skos:definition?
+        	str = <<-EOF.unindent
+        		code:#{code.downcase.capitalize} a rdfs:class, owl:Class;
+        			rdfs:subClassOf skos:Concept ;
+        			rdfs:label "Code list for #{code} - codelist class"@en;
+        			rdfs:comment "Specifies the #{code} for each observation";
+        			rdfs:seeAlso code:#{code.downcase}
+
+        		code:#{code.downcase} a skos:ConceptScheme;
+        			skos:prefLabel "Code list for #{code} - codelist scheme"@en;
+        			rdfs:label "Code list for #{code} - codelist scheme"@en;
+        			skos:notation "CL_#{code.upcase}";
+        			skos:note "Specifies the #{code} for each observation";
+        	EOF
+        	rexp.payload[code].uniq.map{|value|
+        		str << "\tskos:hasTopConcept code:#{code.downcase}_#{value} ;\n"
+        	}
+        	str <<"\t.\n"
+        	codes << str
+        }
+			end
+
+			codes
+		end
+
+		def concept_codes(rexp, var, options={})
+			options = defaults().merge(options)
+			codes = []
+			if options[:type] == :dataframe
+				row_names = rexp.attr.payload["row.names"].to_ruby
+        row_names = 1..rexp.payload.first.to_ruby.size unless row_names.first
+        code_rows = (options[:codes] & row_names) || row_names
+        code_rows.map{|code|
+        	rexp.payload[code].uniq.map{|value|
+        	codes << <<-EOF.unindent
+        		code:#{code.downcase}_#{value} a skos:Concept, code:#{code.downcase.capitalize};
+        			skos:topConceptOf code:#{code.downcase} ;
+        			skos:prefLabel "#{value}" ;
+        			skos:inScheme code:#{code.downcase} .
+
+        	EOF
+        	}
+        }
+			end
+
+			codes
+		end
+
 		def to_resource(obj)
 			if obj.is_a? String
 				#TODO decide the right way to handle missing values, since RDF has no null
@@ -247,6 +319,8 @@ module R2RDF
 			component_specifications(rexp, @var, options).map{ |c| str << c }
 			dimension_properties(rexp, @var, options).map{|p| str << p}
 			measure_properties(rexp, @var, options).map{|p| str << p}
+			code_lists(rexp, @var, options).map{|l| str << l}
+			concept_codes(rexp, @var, options).map{|c| str << c}
 			# rows(rexp, @var, options).map{|r| str << r}
 			observations(rexp, @var, options).map{|o| str << o}
 			str
