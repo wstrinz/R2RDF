@@ -1,9 +1,10 @@
 require_relative '../lib/r2rdf/data_cube.rb'
+require_relative '../lib/r2rdf/generators/r.rb'
 require_relative '../lib/r2rdf/r_client.rb'
 require_relative '../lib/r2rdf/r_builder.rb'
 
 
-describe R2RDF::Cube do
+describe R2RDF::Generator do
 	context "when using r/qtl dataframe" do
 
 		before(:all) do 
@@ -14,14 +15,15 @@ describe R2RDF::Cube do
 				mr = scanone(listeria,method="mr")
 EOF
 			@rexp = @r.eval 'mr'
-			@cube = R2RDF::Cube.new('mr')
-			@turtle = @cube.generate_n3(@rexp)
+			@cube = R2RDF::Generators::R.new
+			@turtle = @cube.generate_n3(@rexp,'mr')
 		end
 		
 		it "generates rdf from scanone result" do
-			cube = R2RDF::Cube.new('mr')
-			turtle_string = cube.generate_n3(@rexp)
-			turtle_string.should_not == nil 
+			# cube = R2RDF::Cube.new('mr')
+			# turtle_string = cube.generate_n3(@rexp)
+			reference = IO.read(File.dirname(__FILE__) + '/turtle/reference')
+			@turtle.should eq reference
 		end
 
 		
