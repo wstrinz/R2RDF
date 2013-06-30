@@ -128,7 +128,7 @@ module R2RDF
         measures.map{ |m|
             
             props <<  <<-EOF.unindent
-            :#{m} a rdf:Property, qb:MeasureProperty ;
+            prop:#{m} a rdf:Property, qb:MeasureProperty ;
               rdfs:label "#{m}"@en .
           
             EOF

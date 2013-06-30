@@ -1,5 +1,5 @@
 require_relative '../lib/r2rdf/data_cube.rb'
-require_relative '../lib/r2rdf/generators/r.rb'
+require_relative '../lib/r2rdf/generators/dataframe.rb'
 require_relative '../lib/r2rdf/r_client.rb'
 require_relative '../lib/r2rdf/r_builder.rb'
 
@@ -39,7 +39,7 @@ describe R2RDF::Generator do
 				mr = scanone(listeria,method="mr")
 EOF
 			@rexp = @r.eval 'mr'
-			@cube = R2RDF::Generators::R.new
+			@cube = R2RDF::Generators::Dataframe.new
 			@turtle = @cube.generate_n3(@rexp,'mr')
 		end
 		

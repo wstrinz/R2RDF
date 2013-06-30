@@ -46,10 +46,10 @@ prop:pricerange a rdf:Property, qb:DimensionProperty ;
   qb:codeList code:pricerange ;
   rdfs:range code:Pricerange .
 
-:chunkiness a rdf:Property, qb:MeasureProperty ;
+prop:chunkiness a rdf:Property, qb:MeasureProperty ;
   rdfs:label "chunkiness"@en .
           
-:deliciousness a rdf:Property, qb:MeasureProperty ;
+prop:deliciousness a rdf:Property, qb:MeasureProperty ;
   rdfs:label "deliciousness"@en .
           
 code:Producer a rdfs:Class, owl:Class;

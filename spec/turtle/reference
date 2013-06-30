@@ -41,13 +41,13 @@ prop:refRow a rdf:Property, qb:DimensionProperty ;
   qb:codeList code:refrow ;
   rdfs:range code:Refrow .
 
-:chr a rdf:Property, qb:MeasureProperty ;
+prop:chr a rdf:Property, qb:MeasureProperty ;
   rdfs:label "chr"@en .
           
-:pos a rdf:Property, qb:MeasureProperty ;
+prop:pos a rdf:Property, qb:MeasureProperty ;
   rdfs:label "pos"@en .
           
-:lod a rdf:Property, qb:MeasureProperty ;
+prop:lod a rdf:Property, qb:MeasureProperty ;
   rdfs:label "lod"@en .
           
 code:Refrow a rdfs:Class, owl:Class;

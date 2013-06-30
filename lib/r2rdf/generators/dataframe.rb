@@ -1,6 +1,6 @@
 module R2RDF
 	module Generators
-		class R
+		class Dataframe
 			include R2RDF::Generator
 		
 			# def initialize(var)
@@ -11,10 +11,6 @@ module R2RDF
 				@rexp = rexp
 				@options = options
 				generate(measures, dimensions, codes, observation_data, observation_labels, var, options)
-			end
-
-			def components(rexp, options)
-
 			end
 
 			def dimensions
@@ -33,7 +29,7 @@ module R2RDF
 						@rexp.payload.names - @options.dimensions
 					end
 				else
-					@options[:dimensions] || @rexp.payload.names
+					@options[:measures] || @rexp.payload.names
 				end
 			end
 
