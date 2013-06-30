@@ -1,23 +1,14 @@
 module R2RDF
   # handles connection and messaging to/from the triple store
   class Store
-    DEFAULTS = {
-      port: 8080,
-      type: :fourstore,
-      url: "http://localhost" #TODO port etc should eventually be extracted from URI if given
-      prefixes: <<-EOF
-@prefix : <http://www.rqtl.org/ns/#> .
-@prefix qb: <http://purl.org/linked-data/cube#> .
-@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix prop: <http://www.rqtl.org/dc/properties/> .
-@prefix cs: <http://www.rqtl.org/dc/cs/> .
-
-      EOF
-    }
+    def defaults
+	    {
+	      type: :fourstore,
+	      url: "http://localhost:8080" #TODO port etc should eventually be extracted from URI if given
+	    }
+	  end
 
     def initialize(options={})
-      #NOTE: make sure this works this way
       @options = DEFAULTS.merge(options)
     end
 
@@ -28,7 +19,7 @@ module R2RDF
     def new_connection
       case @options[:type]
       when :fourstore
-        RDF::FourStore::Repository.new("#{@options[:url]}:#{@options[:port]}/")
+        @repo = RDF::FourStore::Repository.new("#{@options[:url]}/")
       end
     end
 
@@ -42,7 +33,10 @@ module R2RDF
       end
     end
 
-    
+    def clear
+    	@repo.clear_statements
+    end
+
     def load_string
       case options[:type]
       when :fourstore
@@ -52,8 +46,8 @@ module R2RDF
 
     def load(object, include_prefixes=true)
       if object.is_a? RDF::Statement
-
-      elsif object.is_a? String
+      	load_statement(object)
+      # elsif object.is_a? String
         
       else
         puts "Don't know how to load objects of type #{object.class}"

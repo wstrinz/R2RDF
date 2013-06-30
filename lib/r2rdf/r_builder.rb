@@ -64,7 +64,7 @@ module R2RDF
     end
 
     def from_store(store_uri,variable)
-
+    	
     end
 
   end
