@@ -5,9 +5,17 @@ PREFIX qb:      <http://purl.org/linked-data/cube#>
 PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 PREFIX owl:     <http://www.w3.org/2002/07/owl#>
 
-# IC-4. Dimensions have range
+#IC-19_1 Codes from code list
 
 SELECT * WHERE {
-  ?dim a qb:DimensionProperty .
-  FILTER NOT EXISTS { ?dim rdfs:range [] }
+    ?obs qb:dataSet ?ds .
+    ?ds qb:structure ?str .
+    ?str qb:component ?prop .
+    ?prop qb:componentProperty ?dim .
+    ?dim a qb:DimensionProperty ;
+        qb:codeList ?list .
+    ?list a skos:ConceptScheme .
+    ?obs ?dim ?v .
+    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }
 }
+

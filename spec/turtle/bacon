@@ -1,0 +1,143 @@
+@prefix : <http://www.rqtl.org/ns/#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prop: <http://www.rqtl.org/dc/properties/> .
+@prefix cs: <http://www.rqtl.org/dc/cs/> .
+@prefix code: <http://www.rqtl.org/dc/code/> .
+@prefix class: <http://www.rqtl.org/dc/class/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+:dsd-bacon a qb:DataStructureDefinition;
+	qb:component
+		cs:chunkiness ,
+		cs:deliciousness ,
+		cs:producer ,
+		cs:pricerange .
+
+:dataset-bacon a qb:DataSet ;
+	rdfs:label "bacon"@en ;
+	qb:structure :dsd-bacon .
+
+cs:producer a qb:ComponentSpecification ;
+	rdfs:label "producer Component" ;
+	qb:dimension prop:producer .
+
+cs:pricerange a qb:ComponentSpecification ;
+	rdfs:label "pricerange Component" ;
+	qb:dimension prop:pricerange .
+
+cs:chunkiness a qb:ComponentSpecification ;
+	rdfs:label "chunkiness Component" ;
+	qb:measure prop:chunkiness .
+
+cs:deliciousness a qb:ComponentSpecification ;
+	rdfs:label "deliciousness Component" ;
+	qb:measure prop:deliciousness .
+
+prop:producer a rdf:Property, qb:DimensionProperty ;
+  rdfs:label "producer"@en ;
+  qb:codeList code:producer ;
+  rdfs:range code:Producer .
+
+prop:pricerange a rdf:Property, qb:DimensionProperty ;
+  rdfs:label "pricerange"@en ;
+  qb:codeList code:pricerange ;
+  rdfs:range code:Pricerange .
+
+:chunkiness a rdf:Property, qb:MeasureProperty ;
+  rdfs:label "chunkiness"@en .
+          
+:deliciousness a rdf:Property, qb:MeasureProperty ;
+  rdfs:label "deliciousness"@en .
+          
+code:Producer a rdfs:Class, owl:Class;
+	rdfs:subClassOf skos:Concept ;
+	rdfs:label "Code list for producer - codelist class"@en;
+	rdfs:comment "Specifies the producer for each observation";
+	rdfs:seeAlso code:producer .
+
+code:producer a skos:ConceptScheme;
+	skos:prefLabel "Code list for producer - codelist scheme"@en;
+	rdfs:label "Code list for producer - codelist scheme"@en;
+	skos:notation "CL_PRODUCER";
+	skos:note "Specifies the producer for each observation";
+	skos:hasTopConcept code:producer_hormel ;
+	skos:hasTopConcept code:producer_newskies ;
+	skos:hasTopConcept code:producer_whys ;
+	.
+
+code:Pricerange a rdfs:Class, owl:Class;
+	rdfs:subClassOf skos:Concept ;
+	rdfs:label "Code list for pricerange - codelist class"@en;
+	rdfs:comment "Specifies the pricerange for each observation";
+	rdfs:seeAlso code:pricerange .
+
+code:pricerange a skos:ConceptScheme;
+	skos:prefLabel "Code list for pricerange - codelist scheme"@en;
+	rdfs:label "Code list for pricerange - codelist scheme"@en;
+	skos:notation "CL_PRICERANGE";
+	skos:note "Specifies the pricerange for each observation";
+	skos:hasTopConcept code:pricerange_low ;
+	skos:hasTopConcept code:pricerange_medium ;
+	skos:hasTopConcept code:pricerange_nonexistant ;
+	.
+
+code:producer_hormel a skos:Concept, code:Producer;
+	skos:topConceptOf code:producer ;
+	skos:prefLabel "hormel" ;
+	skos:inScheme code:producer .
+
+code:producer_newskies a skos:Concept, code:Producer;
+	skos:topConceptOf code:producer ;
+	skos:prefLabel "newskies" ;
+	skos:inScheme code:producer .
+
+code:producer_whys a skos:Concept, code:Producer;
+	skos:topConceptOf code:producer ;
+	skos:prefLabel "whys" ;
+	skos:inScheme code:producer .
+
+code:pricerange_low a skos:Concept, code:Pricerange;
+	skos:topConceptOf code:pricerange ;
+	skos:prefLabel "low" ;
+	skos:inScheme code:pricerange .
+
+code:pricerange_medium a skos:Concept, code:Pricerange;
+	skos:topConceptOf code:pricerange ;
+	skos:prefLabel "medium" ;
+	skos:inScheme code:pricerange .
+
+code:pricerange_nonexistant a skos:Concept, code:Pricerange;
+	skos:topConceptOf code:pricerange ;
+	skos:prefLabel "nonexistant" ;
+	skos:inScheme code:pricerange .
+
+:obshormel a qb:Observation ;
+	qb:dataSet :dataset-bacon ;
+	rdfs:label "hormel" ;
+	prop:producer code:producer_hormel ;
+	prop:pricerange code:pricerange_low ;
+	prop:chunkiness 1 ;
+	prop:deliciousness 1 ;
+	.
+
+:obsnewskies a qb:Observation ;
+	qb:dataSet :dataset-bacon ;
+	rdfs:label "newskies" ;
+	prop:producer code:producer_newskies ;
+	prop:pricerange code:pricerange_medium ;
+	prop:chunkiness 6 ;
+	prop:deliciousness 9 ;
+	.
+
+:obswhys a qb:Observation ;
+	qb:dataSet :dataset-bacon ;
+	rdfs:label "whys" ;
+	prop:producer code:producer_whys ;
+	prop:pricerange code:pricerange_nonexistant ;
+	prop:chunkiness 9001 ;
+	prop:deliciousness 6 ;
+	.
+

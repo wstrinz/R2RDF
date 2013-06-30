@@ -13,9 +13,6 @@ module R2RDF
     def defaults
       {
         type: :dataframe,
-        dimensions: ["refRow"],
-        codes: ["refRow"],
-        measures: [:all],
 			}
     end
     
@@ -52,14 +49,12 @@ module R2RDF
     def data_structure_definition(components,var,options={})
       options = defaults().merge(options)
 			str = ":dsd-#{var} a qb:DataStructureDefinition;\n"
-			if options[:type] == :dataframe
-				str << "\tqb:component\n"
-				components.map{|n|
-							str << "\t\tcs:#{n} ,\n"
-				}
-				str[-2]='.'
-				str<<"\n"
-			end
+			str << "\tqb:component\n"
+			components.map{|n|
+						str << "\t\tcs:#{n} ,\n"
+			}
+			str[-2]='.'
+			str<<"\n"
 			str
 			# Still needs: 
 			# Recursiveness
@@ -79,7 +74,7 @@ module R2RDF
 		def component_specifications(measure_names, dimension_names, var, options={})
       options = defaults().merge(options)
 			specs = []
-			if options[:type] == :dataframe
+			
 				dimension_names.map{|d|
         specs << <<-EOF.unindent
 					cs:#{d} a qb:ComponentSpecification ;
@@ -97,14 +92,14 @@ module R2RDF
 
 						EOF
 				}
-			end
+			
 			specs
 		end
 
 		def dimension_properties(dimensions, codes, var, options={})
       options = defaults().merge(options)
       props = []
-      if options[:type] == :dataframe
+      
         dimensions.map{|d|  
           if codes.include?(d)
           	props << <<-EOF.unindent
@@ -122,14 +117,14 @@ module R2RDF
 	          EOF
           end
         }
-      end
+      
       props
 		end
 
 		def measure_properties(measures, var, options={})
       options = defaults().merge(options)
 			props = []
-			if options[:type] == :dataframe
+			
         measures.map{ |m|
             
             props <<  <<-EOF.unindent
@@ -138,14 +133,14 @@ module R2RDF
           
             EOF
           }
-			end
+			
 			props
 		end
 
 		def observations(measures, dimensions, codes, data, observation_labels, var, options={})	
       options = defaults().merge(options)
 			obs = []
-			if options[:type] == :dataframe
+			
         
 				observation_labels.each_with_index.map{|r, i|
 					str = <<-EOF.unindent 
@@ -169,35 +164,34 @@ module R2RDF
 					str << "\t.\n\n"
 					obs << str
 				}
-			end
+			
 			obs
 		end
 
 		def code_lists(codes, data, var, options={})
 			options = defaults().merge(options)
 			lists = []
-			if options[:type] == :dataframe
-			    codes.map{|code|
-        	str = <<-EOF.unindent
-						code:#{code.downcase.capitalize} a rdfs:Class, owl:Class;
-							rdfs:subClassOf skos:Concept ;
-							rdfs:label "Code list for #{code} - codelist class"@en;
-							rdfs:comment "Specifies the #{code} for each observation";
-							rdfs:seeAlso code:#{code.downcase} .
+		  codes.map{|code|
+	    	str = <<-EOF.unindent
+					code:#{code.downcase.capitalize} a rdfs:Class, owl:Class;
+						rdfs:subClassOf skos:Concept ;
+						rdfs:label "Code list for #{code} - codelist class"@en;
+						rdfs:comment "Specifies the #{code} for each observation";
+						rdfs:seeAlso code:#{code.downcase} .
 
-						code:#{code.downcase} a skos:ConceptScheme;
-							skos:prefLabel "Code list for #{code} - codelist scheme"@en;
-							rdfs:label "Code list for #{code} - codelist scheme"@en;
-							skos:notation "CL_#{code.upcase}";
-							skos:note "Specifies the #{code} for each observation";
-        	EOF
-        	data[code].uniq.map{|value|
-        		str << "\tskos:hasTopConcept code:#{code.downcase}_#{value} ;\n"
-        	}
-        	str <<"\t.\n\n"
-        	lists << str
-        }
-			end
+					code:#{code.downcase} a skos:ConceptScheme;
+						skos:prefLabel "Code list for #{code} - codelist scheme"@en;
+						rdfs:label "Code list for #{code} - codelist scheme"@en;
+						skos:notation "CL_#{code.upcase}";
+						skos:note "Specifies the #{code} for each observation";
+	    	EOF
+	    	data[code].uniq.map{|value|
+	    		str << "\tskos:hasTopConcept code:#{code.downcase}_#{value} ;\n"
+	    	}
+	    	str <<"\t.\n\n"
+	    	lists << str
+	    }
+			
 
 			lists
 		end
@@ -205,20 +199,17 @@ module R2RDF
 		def concept_codes(codes, data, var, options={})
 			options = defaults().merge(options)
 			concepts = []
-			if options[:type] == :dataframe
-        codes.map{|code|
-        	data[code].uniq.map{|value|
-        	concepts << <<-EOF.unindent
-        		code:#{code.downcase}_#{value} a skos:Concept, code:#{code.downcase.capitalize};
-        			skos:topConceptOf code:#{code.downcase} ;
-        			skos:prefLabel "#{value}" ;
-        			skos:inScheme code:#{code.downcase} .
+      codes.map{|code|
+      	data[code].uniq.map{|value|
+      	concepts << <<-EOF.unindent
+      		code:#{code.downcase}_#{value} a skos:Concept, code:#{code.downcase.capitalize};
+      			skos:topConceptOf code:#{code.downcase} ;
+      			skos:prefLabel "#{value}" ;
+      			skos:inScheme code:#{code.downcase} .
 
-        	EOF
-        	}
-
-        }
-			end
+      	EOF
+      	}
+      }
 
 			concepts
 		end
