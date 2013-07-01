@@ -14,7 +14,7 @@ module R2RDF
 			end
 
 			def codes
-				["individual","chr","sex"]
+				["individual","chr","sex","marker"]
 			end
 
 			def measures
@@ -46,7 +46,7 @@ module R2RDF
 					data[name] = []
 				}
 				n_individuals.times{|row_individ|
-					puts row_individ
+					# puts row_individ
 					data["individual"] << (1..entries_per_individual).to_a.fill(row_individ)
 					@rexp.payload["pheno"].payload.names.map{|name|
 						data[name] << (1..entries_per_individual).to_a.fill(@rexp.payload["pheno"].payload[name].to_ruby[row_individ])

@@ -63,8 +63,18 @@ module R2RDF
       save_workspace(client.R, client.get_ws) if save
     end
 
-    def from_store(store_uri,variable)
-    	
+    def from_store(endpoint_url,variable_in=nil, variable_out=nil, verbose=true, save=true)
+    	unless variable_in && variable_out
+    	  puts "no variable specified. Simple inference coming soon" if verbose
+    	  return
+    	end
+    	puts "connecting to endpoint at #{endpoint_url}" if verbose
+    	sparql = SPARQL::Client.new(endpoint_url)
+    	client = R2RDF::Client.new
+      query = R2RDF::QueryHelper.new
+
+      rows = query.get_ary(sparql.query(query.row_names(variable_in))).flatten
+
     end
 
   end
