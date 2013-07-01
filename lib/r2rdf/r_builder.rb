@@ -32,7 +32,6 @@ module R2RDF
     end
 
     def save_workspace(connection, loc)
-    	puts loc
     	connection.eval "save.image(#{loc})"
     end
 

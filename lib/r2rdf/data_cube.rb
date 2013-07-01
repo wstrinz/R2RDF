@@ -17,6 +17,11 @@ module R2RDF
     end
     
     def generate(measures, dimensions, codes, data, observation_labels, var, options={})
+    	dimensions = process_array(dimensions)
+    	codes = process_array(codes)
+    	measures = process_array(measures)
+    	data = process_hash(data)
+
     	str = prefixes()
     	str << data_structure_definition((measures | dimensions), var, options)
     	str << dataset(var, options)
@@ -27,6 +32,34 @@ module R2RDF
     	concept_codes(codes, data, var, options).map{|c| str << c}
     	observations(measures, dimensions, codes, data, observation_labels, var, options).map{|o| str << o}
     	str
+    end
+
+    def process_array(array)
+    	#remove spaces and other special characters
+    	processed = []
+    	array.map{|entry|
+    		if entry.is_a? String
+    			processed << entry.gsub(' ','_')
+    		else
+    			processed << entry
+    		end
+    	}
+    	processed
+    end
+
+    def process_hash(h)
+    	mappings = {}
+    	h.keys.map{|k| 
+    		if(k.is_a? String)
+	    		mappings[k] = k.gsub(' ','_')
+	    	end
+    	}
+
+    	h.keys.map{|k|
+    		h[mappings[k]] = h.delete(k) if mappings[k]
+    	}
+
+    	h
     end
 
 		def prefixes(options={})
@@ -235,7 +268,15 @@ module R2RDF
 
 		def to_literal(obj)
 			if obj.is_a? String
-				'"'+obj+'"'
+				# Depressing that there's no more elegant way to check if a string is 
+				# a number...
+				if val = Integer(obj) rescue nil
+					val
+				elsif val = Float(obj) rescue nil
+					val
+				else
+					'"'+obj+'"'
+				end
 			elsif obj == nil
 				#TODO decide the right way to handle missing values, since RDF has no null
 				-1

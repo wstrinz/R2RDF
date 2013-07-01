@@ -1,7 +1,7 @@
 module R2RDF
 
 	module Analysis
-
+		
 	end
   
   #handles analysis of R expression to extract properties and recognize potential
