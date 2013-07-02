@@ -1,12 +1,13 @@
+require 'csv'
 module R2RDF
 	module Generators
-		class CSVgen
-			require 'csv'
-
+		class CSV
 			include R2RDF::Generator
 
 			def generate_n3(file, dataset_name, options={})
-				@data = CSV.read(file)
+				#TODO hackish, should find better way to overcome namespace conflicts
+				# @data = Kernel.const_get('CSV').read(file)
+				@data = ::CSV.read(file)
 				@options = options
 				generate(measures, dimensions, codes, observation_data, observation_labels, dataset_name, options)
 			end
@@ -48,8 +49,6 @@ module R2RDF
 					row.each_with_index{|entry,i|
 						obs[@data[0][i]] << entry
 					}
-					# puts @data[0][i]
-					# obs[@data[0][i]] << row[i]
 				}
 				obs
 			end

@@ -17,10 +17,10 @@ module R2RDF
     end
     
     def generate(measures, dimensions, codes, data, observation_labels, var, options={})
-    	dimensions = process_array(dimensions)
-    	codes = process_array(codes)
-    	measures = process_array(measures)
-    	data = process_hash(data)
+    	dimensions = sanitize(dimensions)
+    	codes = sanitize(codes)
+    	measures = sanitize(measures)
+    	data = sanitize_hash(data)
 
     	str = prefixes()
     	str << data_structure_definition((measures | dimensions), var, options)
@@ -34,7 +34,7 @@ module R2RDF
     	str
     end
 
-    def process_array(array)
+    def sanitize(array)
     	#remove spaces and other special characters
     	processed = []
     	array.map{|entry|
@@ -47,7 +47,7 @@ module R2RDF
     	processed
     end
 
-    def process_hash(h)
+    def sanitize_hash(h)
     	mappings = {}
     	h.keys.map{|k| 
     		if(k.is_a? String)
@@ -65,6 +65,7 @@ module R2RDF
 		def prefixes(options={})
       options = defaults().merge(options)
 			<<-EOF.unindent
+			@base <http://www.rqtl.org/ns/dc/>
 			@prefix : <http://www.rqtl.org/ns/#> .
 			@prefix qb: <http://purl.org/linked-data/cube#> .
 			@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -184,7 +185,7 @@ module R2RDF
 					
 					dimensions.map{|d|
 						if codes.include? d
-							str << "\tprop:#{d} code:#{d.downcase}_#{data[d][i]} ;\n"
+							str << "\tprop:#{d} <code/#{d.downcase}/#{data[d][i]}> ;\n"
 						else
 							str << "\tprop:#{d} :#{to_resource(data[d][i])} ;\n"
 						end
@@ -219,7 +220,7 @@ module R2RDF
 						skos:note "Specifies the #{code} for each observation";
 	    	EOF
 	    	data[code].uniq.map{|value|
-	    		str << "\tskos:hasTopConcept code:#{code.downcase}_#{value} ;\n"
+	    		str << "\tskos:hasTopConcept <code/#{code.downcase}/#{value}> ;\n"
 	    	}
 	    	str <<"\t.\n\n"
 	    	lists << str
@@ -235,7 +236,7 @@ module R2RDF
       codes.map{|code|
       	data[code].uniq.map{|value|
       	concepts << <<-EOF.unindent
-      		code:#{code.downcase}_#{value} a skos:Concept, code:#{code.downcase.capitalize};
+      		<code/#{code.downcase}/#{value}> a skos:Concept, code:#{code.downcase.capitalize};
       			skos:topConceptOf code:#{code.downcase} ;
       			skos:prefLabel "#{value}" ;
       			skos:inScheme code:#{code.downcase} .

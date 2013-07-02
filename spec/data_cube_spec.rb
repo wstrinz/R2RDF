@@ -2,6 +2,7 @@ require_relative '../lib/r2rdf/data_cube.rb'
 require_relative '../lib/r2rdf/generators/dataframe.rb'
 require_relative '../lib/r2rdf/r_client.rb'
 require_relative '../lib/r2rdf/r_builder.rb'
+require_relative '../lib/r2rdf/generators/csv.rb'
 
 
 describe R2RDF::Generator do
@@ -25,6 +26,17 @@ describe R2RDF::Generator do
 			turtle_string = gen.generate(["chunkiness","deliciousness"], ["producer","pricerange"], ["producer","pricerange"],
 				data, %w(hormel newskies whys), 'bacon')
 			 ref = IO.read(File.dirname(__FILE__) + '/turtle/bacon')
+			turtle_string.should == ref
+		end
+	end
+
+	context "with csv file" do
+		it "generates turtle string for csv" do
+			gen = R2RDF::Generators::CSV.new
+
+			#prebuilt generators should infer missing information if possible, eg measure, coded dimensions
+			turtle_string = gen.generate_n3(File.dirname(__FILE__) + '/csv/bacon.csv','bacon',{dimensions:["producer","pricerange"], label_column:0})
+			ref = IO.read(File.dirname(__FILE__) + '/turtle/bacon')
 			turtle_string.should == ref
 		end
 	end
