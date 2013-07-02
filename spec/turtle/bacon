@@ -1,5 +1,5 @@
-@base <http://www.rqtl.org/ns/dc/>
-@prefix : <http://www.rqtl.org/ns/#> .
+@base <http://www.rqtl.org/ns/dc/> .
+@prefix ns: <http://www.rqtl.org/ns/#> .
 @prefix qb: <http://purl.org/linked-data/cube#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -10,16 +10,16 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
-:dsd-bacon a qb:DataStructureDefinition;
+ns:dsd-bacon a qb:DataStructureDefinition;
 	qb:component
 		cs:chunkiness ,
 		cs:deliciousness ,
 		cs:producer ,
 		cs:pricerange .
 
-:dataset-bacon a qb:DataSet ;
+ns:dataset-bacon a qb:DataSet ;
 	rdfs:label "bacon"@en ;
-	qb:structure :dsd-bacon .
+	qb:structure ns:dsd-bacon .
 
 cs:producer a qb:ComponentSpecification ;
 	rdfs:label "producer Component" ;
@@ -115,8 +115,8 @@ code:pricerange a skos:ConceptScheme;
 	skos:prefLabel "nonexistant" ;
 	skos:inScheme code:pricerange .
 
-:obshormel a qb:Observation ;
-	qb:dataSet :dataset-bacon ;
+ns:obshormel a qb:Observation ;
+	qb:dataSet ns:dataset-bacon ;
 	rdfs:label "hormel" ;
 	prop:producer <code/producer/hormel> ;
 	prop:pricerange <code/pricerange/low> ;
@@ -124,8 +124,8 @@ code:pricerange a skos:ConceptScheme;
 	prop:deliciousness 1 ;
 	.
 
-:obsnewskies a qb:Observation ;
-	qb:dataSet :dataset-bacon ;
+ns:obsnewskies a qb:Observation ;
+	qb:dataSet ns:dataset-bacon ;
 	rdfs:label "newskies" ;
 	prop:producer <code/producer/newskies> ;
 	prop:pricerange <code/pricerange/medium> ;
@@ -133,8 +133,8 @@ code:pricerange a skos:ConceptScheme;
 	prop:deliciousness 9 ;
 	.
 
-:obswhys a qb:Observation ;
-	qb:dataSet :dataset-bacon ;
+ns:obswhys a qb:Observation ;
+	qb:dataSet ns:dataset-bacon ;
 	rdfs:label "whys" ;
 	prop:producer <code/producer/whys> ;
 	prop:pricerange <code/pricerange/nonexistant> ;

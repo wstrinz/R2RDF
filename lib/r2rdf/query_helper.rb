@@ -32,7 +32,7 @@ module R2RDF
 
     def prefixes
       <<-EOF
-PREFIX :     <http://www.rqtl.org/ns/#> 
+PREFIX ns:     <http://www.rqtl.org/ns/#> 
 PREFIX qb:   <http://purl.org/linked-data/cube#> 
 PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 

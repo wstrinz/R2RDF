@@ -65,8 +65,8 @@ module R2RDF
 		def prefixes(options={})
       options = defaults().merge(options)
 			<<-EOF.unindent
-			@base <http://www.rqtl.org/ns/dc/>
-			@prefix : <http://www.rqtl.org/ns/#> .
+			@base <http://www.rqtl.org/ns/dc/> .
+			@prefix ns: <http://www.rqtl.org/ns/#> .
 			@prefix qb: <http://purl.org/linked-data/cube#> .
 			@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 			@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -82,7 +82,7 @@ module R2RDF
 
     def data_structure_definition(components,var,options={})
       options = defaults().merge(options)
-			str = ":dsd-#{var} a qb:DataStructureDefinition;\n"
+			str = "ns:dsd-#{var} a qb:DataStructureDefinition;\n"
 			str << "\tqb:component\n"
 			components.map{|n|
 						str << "\t\tcs:#{n} ,\n"
@@ -98,9 +98,9 @@ module R2RDF
 		def dataset(var,options={})
       options = defaults().merge(options)
 			<<-EOF.unindent    
-			:dataset-#{var} a qb:DataSet ;
+			ns:dataset-#{var} a qb:DataSet ;
 				rdfs:label "#{var}"@en ;
-				qb:structure :dsd-#{var} .
+				qb:structure ns:dsd-#{var} .
 
 			EOF
 		end
@@ -178,8 +178,8 @@ module R2RDF
         
 				observation_labels.each_with_index.map{|r, i|
 					str = <<-EOF.unindent 
-						:obs#{r} a qb:Observation ;
-							qb:dataSet :dataset-#{var} ;
+						ns:obs#{r} a qb:Observation ;
+							qb:dataSet ns:dataset-#{var} ;
 							rdfs:label "#{r}" ;
 					EOF
 					
@@ -187,7 +187,7 @@ module R2RDF
 						if codes.include? d
 							str << "\tprop:#{d} <code/#{d.downcase}/#{data[d][i]}> ;\n"
 						else
-							str << "\tprop:#{d} :#{to_resource(data[d][i])} ;\n"
+							str << "\tprop:#{d} ns:#{to_resource(data[d][i])} ;\n"
 						end
 					}
 

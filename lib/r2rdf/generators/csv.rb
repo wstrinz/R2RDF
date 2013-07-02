@@ -5,8 +5,6 @@ module R2RDF
 			include R2RDF::Generator
 
 			def generate_n3(file, dataset_name, options={})
-				#TODO hackish, should find better way to overcome namespace conflicts
-				# @data = Kernel.const_get('CSV').read(file)
 				@data = ::CSV.read(file)
 				@options = options
 				generate(measures, dimensions, codes, observation_data, observation_labels, dataset_name, options)
