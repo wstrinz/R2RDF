@@ -47,7 +47,7 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
       str = prefixes
       str << <<-EOS
 SELECT ?val WHERE {
-  ?obs qb:dataSet :dataset-#{var} ;
+  ?obs qb:dataSet ns:dataset-#{var} ;
       prop:#{property} ?val ;
 }
       EOS
@@ -58,19 +58,19 @@ SELECT ?val WHERE {
       str = prefixes
       str << <<-EOS
 SELECT ?label WHERE {
-  ?obs qb:dataSet :dataset-#{var} ;
+  ?obs qb:dataSet ns:dataset-#{var} ;
        prop:refRow ?row .
   ?row skos:prefLabel ?label .
 }
       EOS
     end
 
-    # Currently will say "Component Specification for ___", needs further parsing
+    # Currently will say "___ Component", needs further parsing
     def property_names(var)
       str = prefixes
       str << <<-EOS
 SELECT DISTINCT ?label WHERE {
-  :dsd-#{var} qb:component ?c .
+  ns:dsd-#{var} qb:component ?c .
   ?c rdfs:label ?label
 }
       EOS

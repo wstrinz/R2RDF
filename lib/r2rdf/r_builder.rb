@@ -35,6 +35,10 @@ module R2RDF
     	connection.eval "save.image(#{loc})"
     end
 
+    def get_rownames(variable, helper, repo)
+      rows = helper.get_ary(helper.execute(helper.row_names(variable), repo)).flatten
+    end
+
   end
 
   class Builder
@@ -49,10 +53,9 @@ module R2RDF
       puts "loading #{turtle_file}" if verbose
       repo = RDF::Repository.load(turtle_file)
       puts "loaded #{repo.size} statements into temporary repo" if verbose
-
       client = R2RDF::Client.new
       query = R2RDF::QueryHelper.new
-      rows = query.get_ary(query.execute(query.row_names(variable_in), repo)).flatten
+      rows = get_rownames(variable_in, query, repo)
       puts "frame has #{rows.size} rows" if verbose
 
       vectors = get_vectors(variable_in, query, repo)
