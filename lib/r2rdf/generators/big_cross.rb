@@ -7,21 +7,28 @@ module R2RDF
 				meas = measures(client,var,options)
 				dim = dimensions(client,var,options)
 				codes = codes(client,var,options)
-				n_individuals = client.eval("#{var}$pheno[[1]]").to_ruby.size
 				
 				#write structure
 				open(outfile,'w'){|f| f.write structure(client,var,options)}
 				
-				
+				n_individuals = client.eval("length(#{var}$pheno[[1]])").payload.first
+				entries_per_individual = client.eval("length(#{var}$geno$'1'$map)").to_ruby
+
+				#get genotype data (currently only for chromosome 1)
 				geno_chr = client.eval("#{var}$geno$'1'")
+
+				#get number of markers per individual
 
 				#write observations
 				n_individuals.times{|indi|
-					puts "#{indi}/#{n_individuals}"
-					obs_data = observation_data(client,var,'1',indi,geno_chr,options)
+					#time ||= Time.now
+					obs_data = observation_data(client,var,'1',indi,geno_chr,entries_per_individual,options)
 					labels = labels_for(obs_data,'1',indi)
 					open(outfile,'a'){|f| observations(meas,dim,codes,obs_data,labels,var,options).map{|obs| f.write obs}}
+					puts "#{indi}/#{n_individuals}" #(#{Time.now - time})
+					#time = Time.now
 				}
+
 				#generate(measures, dimensions, codes, observation_data, observation_labels, var, options)
 			end
 
@@ -60,9 +67,8 @@ module R2RDF
 				labels
 			end
 
-			def observation_data(client, var, chr, row_individ, geno_chr, options={})
+			def observation_data(client, var, chr, row_individ, geno_chr, entries_per_individual, options={})
 				data = {}
-				entries_per_individual = client.eval("#{var}$geno$'#{chr}'").payload["map"].payload.size
 				# geno_chr = client.eval("#{var}$geno$'#{chr}'")
 				# n_individuals = client.eval("#{var}$pheno[[1]]").to_ruby.size
 				# entries_per_individual = @rexp.payload["geno"].payload[row_individ].payload["map"].payload.size * @rexp.payload["geno"].payload.names.size
@@ -77,6 +83,7 @@ module R2RDF
 				# n_individuals.times{|row_individ|
 					# puts "#{row_individ}/#{n_individuals}"
 				data["individual"] << (1..entries_per_individual).to_a.fill(row_individ)
+
 				client.eval("names(#{var}$pheno)").to_ruby.map{|name|
 					data[name] << (1..entries_per_individual).to_a.fill(client.eval("#{var}$pheno").payload[name].to_ruby[row_individ])
 				}
