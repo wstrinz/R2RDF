@@ -35,7 +35,7 @@ module R2RDF
 
 			def observation_labels
 				row_names = @rexp.attr.payload["row.names"].to_ruby
-	      row_names = 1..@rexp.payload.first.to_ruby.size unless row_names.first
+	      row_names = (1..@rexp.payload.first.to_ruby.size).to_a unless row_names.first
 	      row_names
 			end
 
