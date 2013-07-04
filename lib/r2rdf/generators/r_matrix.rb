@@ -1,6 +1,6 @@
 module R2RDF
 	module Generators
-		class BigDataframe
+		class RMatrix
 			include R2RDF::Generator
 
 			#NOTE; this is pretty much hard coded for Karl's application right now, and doesn't
@@ -14,13 +14,16 @@ module R2RDF
 				dim = dimensions(client,var,options)
 				codes = codes(client,var,options)
 				
+				outvar = sanitize([var]).first
 				
 				probes_per_file = options[:probes_per_file] || 100
+				col_select = "colnames" 
+				col_select = "names" if options[:type] == :dataframe
 
 				#write structure
 				open(outfile_base+'_structure.ttl','w'){|f| f.write structure(client,var,options)}
 
-				probes=client.eval("names(#{var})").to_ruby
+				probes=client.eval("#{col_select}(#{var})").to_ruby
 				markers = rows(client,var,options)
 
 				probes.each_with_index{|probe,i|
@@ -31,7 +34,8 @@ module R2RDF
 					labels = labels_for(client,var,probe)
 					
 					# labels = sanitize(labels)
-					open(outfile_base+"_#{i/probes_per_file}.ttl",'a'){|f| observations(meas,dim,codes,obs_data,labels,var,var,options).map{|obs| f.write obs}}
+					# return obs_data
+					open(outfile_base+"_#{i/probes_per_file}.ttl",'a'){|f| observations(meas,dim,codes,obs_data,labels,outvar,options).map{|obs| f.write obs}}
 					puts "#{i}/#{probes.size}"
 				}
 				
@@ -79,7 +83,7 @@ module R2RDF
 				if options[:measures]
 						options[:measures] 
 				else
-					["probe","marker","lod"]
+					["probe","marker","value"]
 				end
 				# measure_properties(measures,var,options)
 			end
@@ -117,19 +121,37 @@ module R2RDF
 				# geno_chr = client.eval("#{var}$geno$'#{chr}'")
 				# n_individuals = client.eval("#{var}$pheno[[1]]").to_ruby.size
 				# entries_per_individual = @rexp.payload["geno"].payload[row_individ].payload["map"].payload.size * @rexp.payload["geno"].payload.names.size
-				data["probe"] = []
-				data["marker"] = []
-				data["lod"] = []
+				col_label = "probe"
+				row_label = "marker"
+				val_label = "value"
+
+				if options[:measures]
+					col_label = options[:measures][0] || "probe"
+					row_label = options[:measures][1] || "marker"
+					val_label = options[:measures][2] || "value"
+				end
+
+				data["#{col_label}"] = []
+				data["#{row_label}"] = []
+				data["#{val_label}"] = []
 				
 				# n_individuals.times{|row_individ|
 					# puts "#{row_individ}/#{n_individuals}"
-				probe_obj = client.eval("#{var}[[#{probe_number}]]").to_ruby
+
+				col_select = "colnames" 
+				col_select = "names" if options[:type] == :dataframe
+
+				if options[:type] == :dataframe
+					probe_obj = client.eval("#{var}[[#{probe_number}]]").to_ruby
+				else
+					probe_obj = client.eval("#{var}[,#{probe_number}]").to_ruby
+				end
 				# puts probe_obj
-				probe_id = client.eval("names(#{var})[[#{probe_number}]]").to_ruby
-				data["probe"] = (1..(probe_obj.size)).to_a.fill(probe_id)
+				probe_id = client.eval("#{col_select}(#{var})[[#{probe_number}]]").to_ruby
+				data["#{col_label}"] = (1..(probe_obj.size)).to_a.fill(probe_id)
 				probe_obj.each_with_index{|lod,i|
-					data["marker"] << row_names[i]
-					data["lod"] << lod
+					data["#{row_label}"] << row_names[i]
+					data["#{val_label}"] << lod
 				}
 				
 				data.map{|k,v| v.flatten!}

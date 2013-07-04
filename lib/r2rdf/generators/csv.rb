@@ -6,12 +6,13 @@ module R2RDF
 
 			def generate_n3(file, dataset_name, options={})
 				@data = ::CSV.read(file)
+				# return @data
 				@options = options
 				generate(measures, dimensions, codes, observation_data, observation_labels, dataset_name, options)
 			end
 
 			def dimensions
-				@options[:dimensions] || @data[0][0]
+				@options[:dimensions] || [@data[0][0]]
 			end
 
 			def codes
