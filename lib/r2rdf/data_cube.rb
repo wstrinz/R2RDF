@@ -259,7 +259,7 @@ module R2RDF
 				#TODO  remove special characters (faster) as well (eg '?')
 				obj.gsub(' ','_').gsub('?','')
 			elsif obj == nil
-				"NA"
+				"NaN"
 			elsif obj.is_a? Numeric
 				#resources cannot be referred to purely by integer (?)
 				"n"+obj.to_s
@@ -281,7 +281,7 @@ module R2RDF
 				end
 			elsif obj == nil
 				#TODO decide the right way to handle missing values, since RDF has no null
-				"NA"
+				'"NA"'
 			else
 				obj
 			end
