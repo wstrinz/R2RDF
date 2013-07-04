@@ -20,6 +20,7 @@ module R2RDF
     	dimensions = sanitize(dimensions)
     	codes = sanitize(codes)
     	measures = sanitize(measures)
+    	var = sanitize([var]).first
     	data = sanitize_hash(data)
 
     	str = prefixes()
@@ -39,7 +40,7 @@ module R2RDF
     	processed = []
     	array.map{|entry|
     		if entry.is_a? String
-    			processed << entry.gsub(' ','_')
+    			processed << entry.gsub(/[\s\.]/,'_')
     		else
     			processed << entry
     		end
@@ -175,13 +176,13 @@ module R2RDF
       options = defaults().merge(options)
 			obs = []
 			
-        
 				observation_labels.each_with_index.map{|r, i|
 					str = <<-EOF.unindent 
 						ns:obs#{r} a qb:Observation ;
 							qb:dataSet ns:dataset-#{var} ;
-							rdfs:label "#{r}" ;
 					EOF
+
+					str << "\trdfs:label \"#{r}\" ;\n" unless options[:no_labels]
 					
 					dimensions.map{|d|
 						if codes.include? d

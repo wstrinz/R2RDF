@@ -24,9 +24,9 @@ module R2RDF
 			def measures
 				if @options[:dimensions]
 					if @options[:measures]
-						@options[:measures] - @options.dimensions
+						@options[:measures] - @options[:dimensions]
 					else
-						@rexp.payload.names - @options.dimensions
+						@rexp.payload.names - @options[:dimensions]
 					end
 				else
 					@options[:measures] || @rexp.payload.names
