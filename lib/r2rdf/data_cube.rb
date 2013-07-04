@@ -254,12 +254,12 @@ module R2RDF
 			if obj.is_a? String
 				#TODO decide the right way to handle missing values, since RDF has no null
 				#probably throw an error here since a missing resource is a bigger problem
-				obj = "null" if obj.empty?
+				obj = "NA" if obj.empty?
 				
 				#TODO  remove special characters (faster) as well (eg '?')
 				obj.gsub(' ','_').gsub('?','')
 			elsif obj == nil
-				"NaN"
+				'"NA"'
 			elsif obj.is_a? Numeric
 				#resources cannot be referred to purely by integer (?)
 				"n"+obj.to_s
