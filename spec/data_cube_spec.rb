@@ -133,7 +133,7 @@ EOF
 			# end
 
 			it 'generates prefixes' do
-				prefixes = @cube.prefixes
+				prefixes = @cube.prefixes('test')
 				prefixes.is_a?(String).should == true
 			end
 

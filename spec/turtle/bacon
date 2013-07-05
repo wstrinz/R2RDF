@@ -1,12 +1,12 @@
 @base <http://www.rqtl.org/ns/dc/> .
-@prefix ns: <http://www.rqtl.org/ns/#> .
+@prefix ns: <http://www.rqtl.org/ns/dataset/bacon#> .
 @prefix qb: <http://purl.org/linked-data/cube#> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix prop: <http://www.rqtl.org/dc/properties/> .
-@prefix cs: <http://www.rqtl.org/dc/cs/> .
-@prefix code: <http://www.rqtl.org/dc/code/> .
-@prefix class: <http://www.rqtl.org/dc/class/> .
+@prefix cs: <http://www.rqtl.org/dc/dataset/bacon/cs/> .
+@prefix code: <http://www.rqtl.org/dc/dataset/bacon/code/> .
+@prefix class: <http://www.rqtl.org/dc/dataset/bacon/class/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 

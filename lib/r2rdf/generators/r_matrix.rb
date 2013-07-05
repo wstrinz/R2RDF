@@ -21,14 +21,14 @@ module R2RDF
 				col_select = "names" if options[:type] == :dataframe
 
 				#write structure
-				open(outfile_base+'_structure.ttl','w'){|f| f.write structure(client,var,options)}
+				open(outfile_base+'_structure.ttl','w'){|f| f.write structure(client,var,outvar,options)}
 
 				probes=client.eval("#{col_select}(#{var})").to_ruby
 				markers = rows(client,var,options)
 
 				probes.each_with_index{|probe,i|
 					#write prefixes and erase old file on first run
-					open(outfile_base+"_#{i/probes_per_file}.ttl",'w'){|f| f.write prefixes()} if i==0
+					open(outfile_base+"_#{i/probes_per_file}.ttl",'w'){|f| f.write prefixes(var,options)} if i % probes_per_file == 0
 					i+=1
 					obs_data = observation_data(client,var,i,markers,options)
 					labels = labels_for(client,var,probe)
@@ -64,14 +64,14 @@ module R2RDF
 				#generate(measures, dimensions, codes, observation_data, observation_labels, var, options)
 			end
 
-			def structure(client,var,options={})
+			def structure(client,var,outvar,options={})
 				meas = measures(client,var,options)
 				dim = dimensions(client,var,options)
 				codes = codes(client,var,options)
 
-				str = prefixes()
-				str << data_structure_definition(meas,var,options)
-				str << dataset(var,options)
+				str = prefixes(var, options)
+				str << data_structure_definition(meas,outvar,options)
+				str << dataset(outvar,options)
     		component_specifications(meas, dim, var, options).map{ |c| str << c }
 				measure_properties(meas,var,options).map{|m| str << m}
 				

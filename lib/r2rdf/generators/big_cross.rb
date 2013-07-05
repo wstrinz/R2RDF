@@ -14,8 +14,8 @@ module R2RDF
 				
 				n_individuals = client.eval("length(#{var}$pheno[[1]])").payload.first
 				chromosome_list = (1..19).to_a.map(&:to_s) + ["X"]
-				chromosome_list.map{|chrom|}
-					open(outfile_base+"_#{chrom}.ttl",'w'){|f| f.write prefixes()}
+				chromosome_list.map{|chrom|
+					open(outfile_base+"_#{chrom}.ttl",'w'){|f| f.write prefixes(var,options)}
 					entries_per_individual = client.eval("length(#{var}$geno$'#{chrom}'$map)").to_ruby
 
 					#get genotype data (currently only for chromosome 1)
@@ -33,7 +33,7 @@ module R2RDF
 						puts "(#{chrom}) #{indi}/#{n_individuals}" #(#{Time.now - time})
 						#time = Time.now
 					}
-
+				}
 
 				#generate(measures, dimensions, codes, observation_data, observation_labels, var, options)
 			end
@@ -43,7 +43,7 @@ module R2RDF
 				dim = dimensions(client,var,options)
 				codes = codes(client,var,options)
 
-				str = prefixes()
+				str = prefixes(var,options)
 				str << data_structure_definition(meas,var,options)
 				str << dataset(var,options)
     		component_specifications(meas, dim, var, options).map{ |c| str << c }
@@ -54,7 +54,11 @@ module R2RDF
 
 			def measures(client, var, options={})
 				pheno_names = client.eval("names(#{var}$pheno)").to_ruby
-				pheno_names | ["genotype","markerpos","marker"]
+				if options[:measures]
+					(pheno_names & options[:measures]) | ["genotype","markerpos","marker"]
+				else
+					pheno_names | ["genotype","markerpos","marker"]
+				end
 				# measure_properties(measures,var,options)
 			end
 

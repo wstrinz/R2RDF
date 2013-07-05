@@ -23,7 +23,7 @@ module R2RDF
     	var = sanitize([var]).first
     	data = sanitize_hash(data)
 
-    	str = prefixes()
+    	str = prefixes(var,options)
     	str << data_structure_definition((measures | dimensions), var, options)
     	str << dataset(var, options)
     	component_specifications(measures, dimensions, var, options).map{ |c| str << c }
@@ -63,18 +63,19 @@ module R2RDF
     	h
     end
 
-		def prefixes(options={})
+		def prefixes(var, options={})
+			var = sanitize([var]).first
       options = defaults().merge(options)
 			<<-EOF.unindent
 			@base <http://www.rqtl.org/ns/dc/> .
-			@prefix ns: <http://www.rqtl.org/ns/#> .
+			@prefix ns: <http://www.rqtl.org/ns/dataset/#{var}#> .
 			@prefix qb: <http://purl.org/linked-data/cube#> .
 			@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 			@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 			@prefix prop: <http://www.rqtl.org/dc/properties/> .
-			@prefix cs: <http://www.rqtl.org/dc/cs/> .
-			@prefix code: <http://www.rqtl.org/dc/code/> .
-			@prefix class: <http://www.rqtl.org/dc/class/> .
+			@prefix cs: <http://www.rqtl.org/dc/dataset/#{var}/cs/> .
+			@prefix code: <http://www.rqtl.org/dc/dataset/#{var}/code/> .
+			@prefix class: <http://www.rqtl.org/dc/dataset/#{var}/class/> .
 			@prefix owl: <http://www.w3.org/2002/07/owl#> .
 			@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
@@ -82,6 +83,7 @@ module R2RDF
 		end
 
     def data_structure_definition(components,var,options={})
+    	var = sanitize([var]).first
       options = defaults().merge(options)
 			str = "ns:dsd-#{var} a qb:DataStructureDefinition;\n"
 			str << "\tqb:component\n"
@@ -97,6 +99,7 @@ module R2RDF
     end
 
 		def dataset(var,options={})
+			var = sanitize([var]).first
       options = defaults().merge(options)
 			<<-EOF.unindent    
 			ns:dataset-#{var} a qb:DataSet ;
@@ -173,6 +176,7 @@ module R2RDF
 		end
 
 		def observations(measures, dimensions, codes, data, observation_labels, var, options={})	
+			var = sanitize([var]).first
       options = defaults().merge(options)
 			obs = []
 			

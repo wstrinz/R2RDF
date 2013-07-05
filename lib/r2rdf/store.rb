@@ -8,8 +8,12 @@ module R2RDF
 	    }
 	  end
 
+	  def add(file,graph)
+	  	`curl --data-urlencode data@#{file} -d 'graph=http%3A%2F%2Frqtl.org%2F#{graph}' -d 'mime-type=application/x-turtle' #{@options[:url]}/data/`
+	  end
+
     def initialize(options={})
-      @options = DEFAULTS.merge(options)
+      @options = defaults.merge(options)
     end
 
     def connection
