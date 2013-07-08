@@ -19,7 +19,7 @@ module R2RDF
 					entries_per_individual = client.eval("length(#{var}$geno$'#{chrom}'$map)").to_ruby
 
 					#get genotype data (currently only for chromosome 1)
-					puts "#{var}$geno$'#{chrom}'"
+					# => puts "#{var}$geno$'#{chrom}'"
 					geno_chr = client.eval("#{var}$geno$'#{chrom}'")
 
 					#get number of markers per individual

@@ -6,7 +6,6 @@ module R2RDF
 
 			def generate_n3(file, dataset_name, options={})
 				@data = ::CSV.read(file)
-				# return @data
 				@options = options
 				generate(measures, dimensions, codes, observation_data, observation_labels, dataset_name, options)
 			end
@@ -31,7 +30,7 @@ module R2RDF
 						row[@options[:label_column]]
 					}
 				else
-					1..@data.size - 1
+					(1..@data.size - 1).to_a
 				end
 			end
 

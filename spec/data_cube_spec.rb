@@ -30,17 +30,6 @@ describe R2RDF::Generator do
 		end
 	end
 
-	context "with csv file" do
-		it "generates turtle string for csv" do
-			gen = R2RDF::Generators::CSV.new
-
-			#prebuilt generators should infer missing information if possible, eg measure, coded dimensions
-			turtle_string = gen.generate_n3(File.dirname(__FILE__) + '/csv/bacon.csv','bacon',{dimensions:["producer","pricerange"], label_column:0})
-			ref = IO.read(File.dirname(__FILE__) + '/turtle/bacon')
-			turtle_string.should == ref
-		end
-	end
-
 	context "when using r/qtl dataframe" do
 
 		before(:all) do 
@@ -133,7 +122,7 @@ EOF
 			# end
 
 			it 'generates prefixes' do
-				prefixes = @cube.prefixes('test')
+				prefixes = @cube.prefixes('mr')
 				prefixes.is_a?(String).should == true
 			end
 
