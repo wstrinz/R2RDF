@@ -24,6 +24,10 @@ module R2RDF
 				open(outfile_base+'_structure.ttl','w'){|f| f.write structure(client,var,outvar,options)}
 
 				probes=client.eval("#{col_select}(#{var})").to_ruby
+				if probes == nil
+					client.eval("colnames(#{var})=1:ncol(#{var})")
+					probes=client.eval("#{col_select}(#{var})").to_ruby
+				end
 				markers = rows(client,var,options)
 
 				probes.each_with_index{|probe,i|
@@ -36,32 +40,8 @@ module R2RDF
 					# labels = sanitize(labels)
 					# return obs_data
 					open(outfile_base+"_#{i/probes_per_file}.ttl",'a'){|f| observations(meas,dim,codes,obs_data,labels,outvar,options).map{|obs| f.write obs}}
-					puts "#{i}/#{probes.size}"
+					puts "#{i}/#{probes.size}" unless options[:quiet]
 				}
-				
-				# n_individuals = client.eval("length(#{var}$pheno[[1]])").payload.first
-				# chromosome_list = (1..19).to_a.map(&:to_s) + ["X"]
-				# chromosome_list.map{|chrom|}
-				# 	entries_per_individual = client.eval("length(#{var}$geno$'#{chrom}'$map)").to_ruby
-
-				# 	#get genotype data (currently only for chromosome 1)
-				# 	puts "#{var}$geno$'#{chrom}'"
-				# 	geno_chr = client.eval("#{var}$geno$'#{chrom}'")
-
-				# 	#get number of markers per individual
-
-				# 	#write observations
-				# 	n_individuals.times{|indi|
-				# 		#time ||= Time.now
-				# 		obs_data = observation_data(client,var,chrom.to_s,indi,geno_chr,entries_per_individual,options)
-				# 		labels = labels_for(obs_data,chrom.to_s,indi)
-				# 		open(outfile_base+"_#{chrom}.ttl",'a'){|f| observations(meas,dim,codes,obs_data,labels,var,options).map{|obs| f.write obs}}
-				# 		puts "(#{chrom}) #{indi}/#{n_individuals}" #(#{Time.now - time})
-				# 		#time = Time.now
-				# 	}
-
-
-				#generate(measures, dimensions, codes, observation_data, observation_labels, var, options)
 			end
 
 			def structure(client,var,outvar,options={})
@@ -98,8 +78,13 @@ module R2RDF
 			end
 
 			def labels_for(connection,var,probe_id,options={})
-				row_names = connection.eval("row.names(#{var})").payload
+				row_names = connection.eval("row.names(#{var})")
 				# row_names = (1..@rexp.payload.first.to_ruby.size).to_a unless row_names.first
+				if row_names == connection.eval('NULL')
+					row_names = (1..connection.eval("nrow(#{var})").payload.first).to_a
+				else
+					row_names = row_names.payload
+				end
 
 	      labels = (1..(row_names.size)).to_a.map(&:to_s)
 	      labels = labels.map{|l|
@@ -110,8 +95,13 @@ module R2RDF
 			end
 
 			def rows(connection,var,options={})
-				row_names = connection.eval("row.names(#{var})").payload
-				# row_names = (1..@rexp.payload.first.to_ruby.size).to_a unless row_names.first
+				row_names = connection.eval("row.names(#{var})")
+				#hacky solution because rserve client's .to_ruby method doesn't fully work
+				if row_names == connection.eval('NULL')
+					row_names = (1..connection.eval("nrow(#{var})").payload.first).to_a
+				else
+					row_names = row_names.payload
+				end
 	      row_names
 			end
 
