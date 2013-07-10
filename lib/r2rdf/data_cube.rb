@@ -13,6 +13,8 @@ module R2RDF
     def defaults
       {
         type: :dataframe,
+        encode_nulls: false,
+
 			}
     end
     
@@ -192,12 +194,13 @@ module R2RDF
 						if codes.include? d
 							str << "\tprop:#{d} <code/#{d.downcase}/#{data[d][i]}> ;\n"
 						else
-							str << "\tprop:#{d} ns:#{to_resource(data[d][i])} ;\n"
+							str << "\tprop:#{d} ns:#{to_resource(data[d][i], options)} ;\n"
 						end
 					}
 
 					measures.map{|m|
-						str << "\tprop:#{m} #{to_literal(data[m][i])} ;\n"
+						value = to_literal(data[m][i], options)
+						str << "\tprop:#{m} #{value} ;\n" if value
 					}
 
 					str << "\t.\n\n"
@@ -254,7 +257,7 @@ module R2RDF
 		end
 
 
-		def to_resource(obj)
+		def to_resource(obj, options)
 			if obj.is_a? String
 				#TODO decide the right way to handle missing values, since RDF has no null
 				#probably throw an error here since a missing resource is a bigger problem
@@ -262,7 +265,7 @@ module R2RDF
 				
 				#TODO  remove special characters (faster) as well (eg '?')
 				obj.gsub(' ','_').gsub('?','')
-			elsif obj == nil
+			elsif obj == nil && options[:encode_nulls]
 				'"NA"'
 			elsif obj.is_a? Numeric
 				#resources cannot be referred to purely by integer (?)
@@ -272,7 +275,7 @@ module R2RDF
 			end
 		end
 
-		def to_literal(obj)
+		def to_literal(obj, options)
 			if obj.is_a? String
 				# Depressing that there's no more elegant way to check if a string is 
 				# a number...
@@ -283,7 +286,7 @@ module R2RDF
 				else
 					'"'+obj+'"'
 				end
-			elsif obj == nil
+			elsif obj == nil && options[:encode_nulls]
 				#TODO decide the right way to handle missing values, since RDF has no null
 				'"NA"'
 			else
