@@ -15,13 +15,13 @@ describe R2RDF::Generators::Dataframe do
 		graph
 	end
 
-	before(:each) do 
-		@generator = R2RDF::Generators::Dataframe.new
-		@connection = Rserve::Connection.new 
-	end
+	# before(:each) do 
+	# 	@connection = Rserve::Connection.new 
+	# end
   context "with r/qtl dataframe" do
 		before(:all) do 
 			@r = Rserve::Connection.new
+			@generator = R2RDF::Generators::Dataframe.new
 			@r.eval <<-EOF
 				library(qtl)
 				data(listeria)
