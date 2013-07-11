@@ -42,6 +42,10 @@ EOF
 			reference = IO.read(File.dirname(__FILE__) + '/../turtle/reference')
 			@turtle.should eq reference
 		end
+
+		it "can optionally specify a row label" do
+			@turtle = @generator.generate_n3(@rexp,'mr',{row_label:"markers"})
+		end
 	end
 
 		

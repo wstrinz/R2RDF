@@ -10,15 +10,28 @@ module R2RDF
 			def generate_n3(rexp, var, options={})
 				@rexp = rexp
 				@options = options
+
 				generate(measures, dimensions, codes, observation_data, observation_labels, var, options)
 			end
 
 			def dimensions
-				@options[:dimensions] || ["refRow"]
+				if @options[:dimensions]
+					@options[:dimensions]
+				elsif @options[:row_label]
+					[@options[:row_label]]
+				else
+					["refRow"]
+				end	
 			end
 
 			def codes
-				@options[:codes] || ["refRow"]
+				if @options[:codes]
+					@options[:codes]
+				elsif @options[:row_label]
+					[@options[:row_label]]
+				else
+					["refRow"]
+				end	
 			end
 
 			def measures
@@ -48,7 +61,7 @@ module R2RDF
 				@rexp.payload.names.map{|name|
 					data[name] = @rexp.payload[name].to_ruby
 				}
-				data["refRow"] = observation_labels()
+				data[@options[:row_label] || "refRow"] = observation_labels()
 				data
 			end
 		end
