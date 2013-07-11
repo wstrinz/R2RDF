@@ -33,6 +33,7 @@ EOF
 
 		it "generates rdf from R dataframe" do
 			turtle = @generator.generate_n3(@rexp,'mr')
+			turtle.is_a?(String).should be true
 		end
 		
 		it "creates correct graph according to refrence file" do

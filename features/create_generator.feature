@@ -1,4 +1,4 @@
-Feature: create generator
+Feature: create generators
 
 	In order to do a basic cucumber test
 	As a person with a keyboard
@@ -6,10 +6,16 @@ Feature: create generator
 
 	Scenario: create a Dataframe generator
 		Given a Dataframe generator
-		When I ask for its methods
-		Then I should have access to a generate_n3 method
+		Then I should have access to its generate_n3 method
 
 	Scenario: create a CSV generator
 		Given a CSV generator
-		When I ask for its methods
-		Then I should have access to a generate_n3 method	
+		Then I should have access to its generate_n3 method	
+
+	Scenario: create a RMatrix generator
+		Given a RMatrix generator
+		Then I should have access to its generate_n3 method
+
+	Scenario: create a Cross generator
+		Given a Cross generator
+		Then I should have access to its generate_n3 method	
