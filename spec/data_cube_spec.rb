@@ -35,6 +35,31 @@ describe R2RDF::Generator do
 			turtle_string.should == ref
 		end
 
+		context "with missing values" do
+
+			before(:all) do
+				@missing_data = Marshal.load(Marshal.dump(@data))
+				missingobs = {
+					"producer" =>      "missingbacon",
+					"pricerange" =>    "unknown",
+					"chunkiness"=>     nil,
+					"deliciousness"=>  nil,  
+				}
+				missingobs.map{|k,v| @missing_data[k] << v}
+			end
+
+			it "skips observations with missing values by default" do				
+				turtle_string = @generator.generate(@measures, @dimensions, @codes,	@missing_data, @labels + ["missingbacon"], 'bacon')
+				turtle_string[/.*obsmissingbacon.*\n/].should be nil
+			end
+
+			it "includes observations with missing values if flag is set" do
+				turtle_string = @generator.generate(@measures, @dimensions, @codes,	@missing_data, @labels + ["missingbacon"], 'bacon',{encode_nulls: true})
+				turtle_string[/.*obsmissingbacon.*\n/].should_not be nil
+			end
+
+		end
+
 		it 'generates prefixes' do
 				prefixes = @generator.prefixes('bacon')
 				prefixes.is_a?(String).should == true

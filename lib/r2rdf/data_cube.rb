@@ -183,6 +183,7 @@ module R2RDF
 			obs = []
 			
 				observation_labels.each_with_index.map{|r, i|
+					contains_nulls = false
 					str = <<-EOF.unindent 
 						ns:obs#{r} a qb:Observation ;
 							qb:dataSet ns:dataset-#{var} ;
@@ -191,6 +192,8 @@ module R2RDF
 					str << "\trdfs:label \"#{r}\" ;\n" unless options[:no_labels]
 					
 					dimensions.map{|d|
+						# puts data[d][i] == nil
+						contains_nulls = contains_nulls | (data[d][i] == nil)
 						if codes.include? d
 							str << "\tprop:#{d} <code/#{d.downcase}/#{data[d][i]}> ;\n"
 						else
@@ -199,14 +202,16 @@ module R2RDF
 					}
 
 					measures.map{|m|
-						value = to_literal(data[m][i], options)
-						str << "\tprop:#{m} #{value} ;\n" if value
+						contains_nulls = contains_nulls | (data[m][i] == nil)
+						str << "\tprop:#{m} #{to_literal(data[m][i], options)} ;\n" 
+						
 					}
 
 					str << "\t.\n\n"
-					obs << str
+					obs << str unless contains_nulls && !options[:encode_nulls]
+
 				}
-			
+			# puts obs
 			obs
 		end
 
@@ -228,9 +233,12 @@ module R2RDF
 						skos:note "Specifies the #{code} for each observation";
 	    	EOF
 	    	data[code].uniq.map{|value|
-	    		str << "\tskos:hasTopConcept <code/#{code.downcase}/#{value}> ;\n"
+    			unless value == nil && !options[:encode_nulls]
+	    			str << "\tskos:hasTopConcept <code/#{code.downcase}/#{to_resource(value,options)}> ;\n"
+	    		end
 	    	}
-	    	str <<"\t.\n\n"
+	    	
+	    	str << "\t.\n\n"
 	    	lists << str
 	    }
 			
@@ -243,13 +251,15 @@ module R2RDF
 			concepts = []
       codes.map{|code|
       	data[code].uniq.map{|value|
-      	concepts << <<-EOF.unindent
-      		<code/#{code.downcase}/#{value}> a skos:Concept, code:#{code.downcase.capitalize};
-      			skos:topConceptOf code:#{code.downcase} ;
-      			skos:prefLabel "#{value}" ;
-      			skos:inScheme code:#{code.downcase} .
+      		unless value == nil && !options[:encode_nulls]
+		      	concepts << <<-EOF.unindent
+		      		<code/#{code.downcase}/#{to_resource(value,options)}> a skos:Concept, code:#{code.downcase.capitalize};
+		      			skos:topConceptOf code:#{code.downcase} ;
+		      			skos:prefLabel "#{to_resource(value,options)}" ;
+		      			skos:inScheme code:#{code.downcase} .
 
-      	EOF
+		      	EOF
+		      end
       	}
       }
 
