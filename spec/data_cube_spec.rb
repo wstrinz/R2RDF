@@ -28,7 +28,7 @@ describe R2RDF::Generator do
 			}
 		end
 
-		it "should generate output for simple objects" do
+		it "should correct output according to the reference file" do
 			
 			turtle_string = @generator.generate(@measures, @dimensions, @codes,	@data, @labels, 'bacon')
 			 ref = IO.read(File.dirname(__FILE__) + '/turtle/bacon')
