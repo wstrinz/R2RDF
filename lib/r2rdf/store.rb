@@ -12,6 +12,14 @@ module R2RDF
 	  	`curl --data-urlencode data@#{file} -d 'graph=http%3A%2F%2Frqtl.org%2F#{graph}' -d 'mime-type=application/x-turtle' #{@options[:url]}/data/`
 	  end
 
+	  def add_all(dir, graph, pattern=nil)
+	  	pattern = /.+\.ttl/ if pattern == :turtle || pattern == :ttl 
+
+	  	files = Dir.entries(dir) - %w(. ..)
+	  	files = files.grep(regex) if regex.is_a? Regexp
+	  	files.each{|file| puts file; add(file,graph)}
+	  end
+
     def initialize(options={})
       @options = defaults.merge(options)
     end
