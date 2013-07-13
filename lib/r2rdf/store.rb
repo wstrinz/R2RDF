@@ -14,10 +14,12 @@ module R2RDF
 
 	  def add_all(dir, graph, pattern=nil)
 	  	pattern = /.+\.ttl/ if pattern == :turtle || pattern == :ttl 
-
+	
 	  	files = Dir.entries(dir) - %w(. ..)
-	  	files = files.grep(regex) if regex.is_a? Regexp
-	  	files.each{|file| puts file; add(file,graph)}
+	  	files = files.grep(pattern) if pattern.is_a? Regexp
+	  	nfiles = files.size
+		n = 0
+		files.each{|file| puts file + " #{n+=1}/#{nfiles} files"; puts add(file,graph)}
 	  end
 
     def initialize(options={})

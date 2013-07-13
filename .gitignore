@@ -42,3 +42,5 @@ Thumbs.db
 *.n3
 *.ttl
 *.rdf
+
+Gemfile.lock

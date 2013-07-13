@@ -1,3 +1,4 @@
+source 'https://rubygems.org'
 gem 'rdf'
 gem 'rdf-4store'
 gem 'rdf-turtle'
