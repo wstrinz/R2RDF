@@ -24,6 +24,15 @@ EOF
 
 end
 
+When /^I provide the reference file (.*) and the label "(.*?)"$/ do |file, label|
+	raise "Cant find #{file}" unless File.exist? file
+	@attr = file,label
+end
+
+When /^generate a turtle string from it$/ do
+	@turtle_string = @generator.send :generate_n3, *@attr
+end
+
 Then /^I should have access to a (.*) method$/ do |method|
 	@methods.include?(method).should == true
 end
@@ -32,7 +41,10 @@ Then /^I should be able to call its (.*) method$/ do |method|
 	@generator.methods.include?(:"#{method}").should == true
 end
 
-Then /^it should generate a turtle string containing a "(.*?)"$/ do |search|
-	str = @generator.send :generate_n3, *@attr
-	str[search].should_not be nil
+Then /^the result should contain a "(.*?)"$/ do |search|
+	@turtle_string[search].should_not be nil
+end
+
+Then /^the result should contain some "(.*?)"s$/ do |search|
+	@turtle_string[search].size.should > 1
 end
