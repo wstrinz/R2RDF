@@ -14,7 +14,7 @@ module R2RDF
       {
         type: :dataframe,
         encode_nulls: false,
-
+        base_url: "http://www.rqtl.org",
 			}
     end
     
@@ -68,16 +68,17 @@ module R2RDF
 		def prefixes(var, options={})
 			var = sanitize([var]).first
       options = defaults().merge(options)
+      base = options[:base_url]
 			<<-EOF.unindent
-			@base <http://www.rqtl.org/ns/dc/> .
-			@prefix ns: <http://www.rqtl.org/ns/dataset/#{var}#> .
+			@base <#{base}/ns/dc/> .
+			@prefix ns: <#{base}/ns/dataset/#{var}#> .
 			@prefix qb: <http://purl.org/linked-data/cube#> .
 			@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 			@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-			@prefix prop: <http://www.rqtl.org/dc/properties/> .
-			@prefix cs: <http://www.rqtl.org/dc/dataset/#{var}/cs/> .
-			@prefix code: <http://www.rqtl.org/dc/dataset/#{var}/code/> .
-			@prefix class: <http://www.rqtl.org/dc/dataset/#{var}/class/> .
+			@prefix prop: <#{base}/dc/properties/> .
+			@prefix cs: <#{base}/dc/dataset/#{var}/cs/> .
+			@prefix code: <#{base}/dc/dataset/#{var}/code/> .
+			@prefix class: <#{base}/dc/dataset/#{var}/class/> .
 			@prefix owl: <http://www.w3.org/2002/07/owl#> .
 			@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
@@ -95,9 +96,6 @@ module R2RDF
 			str[-2]='.'
 			str<<"\n"
 			str
-			# Still needs: 
-			# Recursiveness
-			#	class and other attributes
     end
 
 		def dataset(var,options={})

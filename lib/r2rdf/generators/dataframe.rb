@@ -54,9 +54,6 @@ module R2RDF
 
 			def observation_data
 
-				## apparently you can't easily add to an Rexp...
-				## probably would be good to figure a way in the future, but for now this works
-
 				data = {}
 				@rexp.payload.names.map{|name|
 					data[name] = @rexp.payload[name].to_ruby
