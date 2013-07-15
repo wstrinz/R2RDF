@@ -43,6 +43,10 @@ module R2RDF
       end
     end
 
+   	def load_string(string)
+   		
+   	end
+
     #TODO any place these case statements exist should have a check on if the
     #repo conforms to the RDF::Repository interface, instead of calling insert
     #for each one.
@@ -52,6 +56,7 @@ module R2RDF
         repo.insert(s)
       end
     end
+
 
     def clear
     	@repo.clear_statements
