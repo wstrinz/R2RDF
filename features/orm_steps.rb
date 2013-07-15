@@ -42,7 +42,6 @@ Given /^an ORM::DataCube entitled "(.*?)" with the following options:$/ do |name
 
 		options_hash[k] = v
 	}
-	puts options_hash
 	@cube = R2RDF::ORM::DataCube.new(options_hash)
 end
 
@@ -50,15 +49,20 @@ When /^I add a "(.*?)" dimension$/ do |dim|
 	@cube.add_dimension(dim)
 end
 
-And /^I add a "(.*?)" measure$/ do |meas|
+When /^I add a "(.*?)" measure$/ do |meas|
 	@cube.add_measure(meas)
 end
 
-And /^I add the observation (.*)$/ do |obs|
-	data = {}
+When /^I add the observation (.*)$/ do |obs|
 	data = eval(obs)
 	# obs.split(',').map{|entry| data[entry.chomp.strip.split(':')[0].to_s] = eval(entry.chomp.strip.split(':')[1])}
 	@cube.add_observation(data)
+end
+
+When /^adding the observation (.*) should raise error (.*)$/ do |obs,err|
+	data = eval(obs)
+	# obs.split(',').map{|entry| data[entry.chomp.strip.split(':')[0].to_s] = eval(entry.chomp.strip.split(':')[1])}
+	expect { @cube.add_observation(data) }.to raise_error(err)
 end
 
 Then /^the to_n3 method should return a string$/ do

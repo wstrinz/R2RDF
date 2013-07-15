@@ -14,17 +14,26 @@ Feature: generate data using ORM
 		Then the to_n3 method should return a string
 
 	Scenario: raise error when unknown components are used
-		Given an ORM::DataCube entitled "cars"
-		When I add a "model" dimension
-		And I add a "price" measure
-		And I add the observation {model: "big", price: 1000}
+		Given an ORM::DataCube entitled "animals"
+		When I add a "robustness" dimension
+		And I add a "species" measure
+		And I add the observation {species: "Balaenoptera musculus", robustness: 25}
+		And I add the observation {species: "Hypsibius dujardini", robustness: 9001}
 		Then the to_n3 method should return a string
-		When I add the observation {model: "big", price: 80, chunkiness: 9}
+		When I add the observation {species: "Deinococcus radiodurans", robustness: 350, chunkiness: 9}
 		Then the to_n3 method should raise error UnknownProperty ["chunkiness"]
 
 	Scenario: raise error when components are missing
-		Given an ORM::DataCube entitled "cars"
-		When I add a "model" dimension
-		And I add a "price" measure
-		And I add the observation {model: "big"}
-		Then the to_n3 method should raise error MissingValues for ["price"]
+		Given an ORM::DataCube entitled "animals"
+		When I add a "robustness" dimension
+		And I add a "species" measure
+		And I add the observation {species: "Felis catus"}
+		Then the to_n3 method should raise error MissingValues for ["robustness"]
+
+	Scenario: raise error when components are missing
+		Given an ORM::DataCube entitled "animals" with the following options: 
+		| key | value |
+		| :validate_each | true |
+		When I add a "robustness" dimension
+		And I add a "species" measure
+		Then adding the observation {species: "big"} should raise error MissingValues for ["robustness"]
