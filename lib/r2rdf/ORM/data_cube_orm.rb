@@ -13,7 +13,8 @@ module R2RDF
 				@measures = []
 				@obs = []
 				@generator_options = {}
-				
+				@options = {}
+
 				parse_options options
 			end
 
@@ -58,13 +59,14 @@ module R2RDF
 				data = {}
 
 
-				check_integrity(data)
 				#collect observation data
+				check_integrity(@obs)
 				@obs.map{|obs|
 					(@measures | @dimensions.keys).map{ |component|
 					 (data[component] ||= []) <<  obs.data[component]
 					}
 				}
+				
 
 				codes = @dimensions.map{|d,v| d if v[:type] == :coded}.compact
 
@@ -79,19 +81,18 @@ module R2RDF
 				@measures << name
 			end
 
-			def check_integrity(observations)
-				observations.map{|o|
-						raise "MissingValues for #{(@dimensions.keys | @measures) - data.keys}" unless ((@dimensions.keys | @measures) - o.data.keys).empty?
-						raise "UnknownProperty #{data.keys - (@dimensions.keys | @measures)}" unless (o.data.keys - (@dimensions.keys | @measures)).empty?
+			def check_integrity(obs)
+				obs.map{|o|
+						raise "MissingValues for #{(@dimensions.keys | @measures) - o.data.keys}" unless ((@dimensions.keys | @measures) - o.data.keys).empty?
+						raise "UnknownProperty #{o.data.keys - (@dimensions.keys | @measures)}" unless (o.data.keys - (@dimensions.keys | @measures)).empty?
 				}
 			end
 
 			def add_observation(data)
 				data = Hash[data.map{|k,v| [k.to_s, v]}]
 				obs = Observation.new(data)
-				# check_integrity([obs]) if @options[:validate_each]
+				check_integrity([obs]) if @options[:validate_each]
 				@obs << obs
-
 			end
 
 			def insert(observation)

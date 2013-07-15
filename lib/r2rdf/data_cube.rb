@@ -33,7 +33,6 @@ module R2RDF
     	measure_properties(measures, var, options).map{|p| str << p}
     	code_lists(codes, data, var, options).map{|l| str << l}
     	concept_codes(codes, data, var, options).map{|c| str << c}
-    	# puts data
     	observations(measures, dimensions, codes, data, observation_labels, var, options).map{|o| str << o}
     	str
     end
@@ -191,7 +190,6 @@ module R2RDF
 					str << "\trdfs:label \"#{r}\" ;\n" unless options[:no_labels]
 					
 					dimensions.map{|d|
-						# puts data[d][i] == nil
 						contains_nulls = contains_nulls | (data[d][i] == nil)
 						if codes.include? d
 							str << "\tprop:#{d} <code/#{d.downcase}/#{data[d][i]}> ;\n"
@@ -210,7 +208,6 @@ module R2RDF
 					obs << str unless contains_nulls && !options[:encode_nulls]
 
 				}
-			# puts obs
 			obs
 		end
 

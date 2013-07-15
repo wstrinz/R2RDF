@@ -28,6 +28,24 @@ Given /^an ORM::DataCube entitled "(.*?)"$/ do |name|
 	@cube = R2RDF::ORM::DataCube.new(name: name)
 end
 
+Given /^an ORM::DataCube entitled "(.*?)" with the following options:$/ do |name, opts|
+	options_hash = {name: name}
+	opts.hashes.map{|hash|
+		k = hash["key"]
+		k = k[1..-1].to_sym if k[0] == ":"
+
+		v = hash["value"]
+		v = v[1..-1].to_sym if k[0] == ":"
+		
+		v = true if v =="true"
+		v = false if v =="false"
+
+		options_hash[k] = v
+	}
+	puts options_hash
+	@cube = R2RDF::ORM::DataCube.new(options_hash)
+end
+
 When /^I add a "(.*?)" dimension$/ do |dim|
 	@cube.add_dimension(dim)
 end
@@ -36,13 +54,18 @@ And /^I add a "(.*?)" measure$/ do |meas|
 	@cube.add_measure(meas)
 end
 
-And /^I add the observation \{(.*)\}$/ do |obs|
+And /^I add the observation (.*)$/ do |obs|
 	data = {}
-	obs.split(',').map{|entry| data[entry.chomp.strip.split(':')[0].to_s] = eval(entry.chomp.strip.split(':')[1])}
+	data = eval(obs)
+	# obs.split(',').map{|entry| data[entry.chomp.strip.split(':')[0].to_s] = eval(entry.chomp.strip.split(':')[1])}
 	@cube.add_observation(data)
 end
 
 Then /^the to_n3 method should return a string$/ do
 	@cube.to_n3.is_a?(String).should be true
+end
+
+Then /^the to_n3 method should raise error (.*?)$/ do |err|
+	expect { @cube.to_n3 }.to raise_error(err)
 end
 
