@@ -19,6 +19,10 @@ Then /^I should recieve a non-empty graph$/ do
 	@graph.size.should > 0
 end
 
+Then /^I should receive an info string$/ do
+	@graph.is_a?(String).should be true
+end
+
 Then /^raise the result$/ do
 	raise "got @graph"
 end

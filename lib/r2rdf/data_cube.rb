@@ -33,6 +33,7 @@ module R2RDF
     	measure_properties(measures, var, options).map{|p| str << p}
     	code_lists(codes, data, var, options).map{|l| str << l}
     	concept_codes(codes, data, var, options).map{|c| str << c}
+    	# puts data
     	observations(measures, dimensions, codes, data, observation_labels, var, options).map{|o| str << o}
     	str
     end

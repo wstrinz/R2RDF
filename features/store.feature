@@ -11,4 +11,4 @@ Feature: load triples into a store
 	Scenario: Use 4store to store data
 		Given a store of type fourstore
 		When I call the stores add method with the turtle file spec/turtle/reference the graph name "test"
-		Then raise the result
+		Then I should receive an info string
