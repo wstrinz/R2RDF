@@ -2,6 +2,7 @@ module R2RDF
 	module ORM
 		class DataCube
 			include R2RDF::Generator
+			include R2RDF::Analyzer
 
 			attr_accessor :labels
 			attr_accessor :dimensions
@@ -60,7 +61,7 @@ module R2RDF
 
 
 				#collect observation data
-				check_integrity(@obs)
+				check_integrity(@obs.map{|o| o.data}, @dimensions.keys, @measures)
 				@obs.map{|obs|
 					(@measures | @dimensions.keys).map{ |component|
 					 (data[component] ||= []) <<  obs.data[component]
@@ -81,22 +82,23 @@ module R2RDF
 				@measures << name
 			end
 
-			def check_integrity(obs)
-				obs.map{|o|
-						raise "MissingValues for #{(@dimensions.keys | @measures) - o.data.keys}" unless ((@dimensions.keys | @measures) - o.data.keys).empty?
-						raise "UnknownProperty #{o.data.keys - (@dimensions.keys | @measures)}" unless (o.data.keys - (@dimensions.keys | @measures)).empty?
-				}
-			end
-
 			def add_observation(data)
 				data = Hash[data.map{|k,v| [k.to_s, v]}]
 				obs = Observation.new(data)
-				check_integrity([obs]) if @options[:validate_each]
+				check_integrity([obs.data],@dimensions.keys,@measures) if @options[:validate_each]
 				@obs << obs
 			end
 
 			def insert(observation)
 				@obs << observation
+			end
+
+			def to_h
+				{
+					measures: @measures,
+					dimensions: @dimensions,
+					observations: @obs.map{|o| o.data}
+				}
 			end
 		end
 	end

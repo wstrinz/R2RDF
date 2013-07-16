@@ -13,6 +13,7 @@ load File.dirname(__FILE__) + '/data_cube.rb'
 load File.dirname(__FILE__) + '/query_helper.rb'
 load File.dirname(__FILE__) + '/r_client.rb'
 load File.dirname(__FILE__) + '/r_builder.rb'
+load File.dirname(__FILE__) + '/analyzer.rb'
 load File.dirname(__FILE__) + '/store.rb'
 
 

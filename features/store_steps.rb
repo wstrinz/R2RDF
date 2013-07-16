@@ -14,6 +14,13 @@ When /^I call the stores add method with the turtle file (.*?) the graph name "(
 end
 
 
+When /^I call the query method using the text in file (.*)$/ do |file|
+	# spec/queries/integrity/1.rq
+	query_string = IO.read(file)
+	query_string
+	@query_result  = @store.query(query_string)
+end
+
 Then /^I should recieve a non-empty graph$/ do
 	@graph.is_a?(RDF::Graph).should be true
 	@graph.size.should > 0
@@ -25,4 +32,12 @@ end
 
 Then /^raise the result$/ do
 	raise "got @graph"
+end
+
+# Then /^I should receive no results$/ do
+# 	@query_result.size.should == 0
+# end
+
+Then /^I should receive (.*) results$/ do |num|
+	@query_result.size.should == num.to_i
 end

@@ -43,6 +43,16 @@ module R2RDF
       end
     end
 
+    def query(string)
+			if @options[:type] == :graph
+				throw "Don't know how to query a graph yet :("
+			elsif @options[:type] == :fourstore
+				sparql = SPARQL::Client.new(@options[:url]+"/sparql/")
+				result = sparql.query(string)
+				result
+		  end
+    end
+
    	def load_string(string)
    		
    	end

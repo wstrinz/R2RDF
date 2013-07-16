@@ -12,3 +12,10 @@ Feature: load triples into a store
 		Given a store of type fourstore
 		When I call the stores add method with the turtle file spec/turtle/reference the graph name "test"
 		Then I should receive an info string
+
+	Scenario: Run queries on store
+		Given a store of type fourstore
+		When I call the query method using the text in file spec/queries/integrity/1.rq
+		Then I should receive 0 results
+		When I call the query method using the text in file queries/test.rq
+		Then I should receive 10 results

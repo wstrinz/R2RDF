@@ -111,7 +111,7 @@ module R2RDF
 			if fields[:publishers]
 				fields[:publishers].map{|publisher|
 					raise "No URI for publisher #{publisher}" unless publisher[:uri]
-					raise "No URI for publisher #{publisher}" unless publisher[:label]
+					raise "No label for publisher #{publisher}" unless publisher[:label]
 					str << "\tdct:publisher <#{publisher[:uri]}> ;\n"
 					end_str << "<#{publisher[:uri]}> a org:Organization, foaf:Agent;\n\trdfs:label \"#{publisher[:label]}\" .\n\n"
 				}
