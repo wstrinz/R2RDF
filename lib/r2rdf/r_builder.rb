@@ -45,7 +45,7 @@ module R2RDF
     include R2RDF::Rbuilder
 
 
-    def from_turtle(turtle_file,variable_in=nil, variable_out=nil, verbose=true, save=true)
+    def from_turtle(turtle_file, connection, variable_in=nil, variable_out=nil, verbose=true, save=true)
       unless variable_in && variable_out
         puts "no variable specified. Simple inference coming soon" if verbose
         return
@@ -53,7 +53,7 @@ module R2RDF
       puts "loading #{turtle_file}" if verbose
       repo = RDF::Repository.load(turtle_file)
       puts "loaded #{repo.size} statements into temporary repo" if verbose
-      client = R2RDF::Client.new
+      # connection = Rserve::Connection.new
       query = R2RDF::QueryHelper.new
       rows = get_rownames(variable_in, query, repo)
       puts "frame has #{rows.size} rows" if verbose
@@ -61,18 +61,18 @@ module R2RDF
       vectors = get_vectors(variable_in, query, repo)
       puts "got vectors of size #{vectors.first.last.size}" if verbose && vectors.first
 
-      create_dataframe(variable_out, client.R, rows, vectors)
-      save_workspace(client.R, client.get_ws) if save
+      create_dataframe(variable_out, connection, rows, vectors)
+      save_workspace(connection, connection.eval('getwd()').to_ruby) if save
     end
 
-    def from_store(endpoint_url,variable_in=nil, variable_out=nil, verbose=true, save=true)
+    def from_store(endpoint_url,connection,variable_in=nil, variable_out=nil, verbose=true, save=true)
     	unless variable_in && variable_out
     	  puts "no variable specified. Simple inference coming soon" if verbose
     	  return
     	end
     	puts "connecting to endpoint at #{endpoint_url}" if verbose
     	sparql = SPARQL::Client.new(endpoint_url)
-    	client = R2RDF::Client.new
+    	# client = R2RDF::Client.new
       query = R2RDF::QueryHelper.new
 
       rows = query.get_ary(sparql.query(query.row_names(variable_in))).flatten

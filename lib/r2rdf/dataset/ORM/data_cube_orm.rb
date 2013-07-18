@@ -1,8 +1,9 @@
 module R2RDF
 	module ORM
 		class DataCube
-			include R2RDF::Generator
+			include R2RDF::Dataset::DataCube
 			include R2RDF::Analyzer
+			include R2RDF::Metadata
 
 			attr_accessor :labels
 			attr_accessor :dimensions
@@ -84,9 +85,8 @@ module R2RDF
           description: description(),
           date: date(),
         }
-
-        str += "\n" + metadata(fields,@generator_options)
-        puts str.class
+        # puts basic(fields,@generator_options)
+        str += "\n" + basic(fields,@generator_options)
         str
 			end
 

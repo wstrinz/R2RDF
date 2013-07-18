@@ -1,10 +1,12 @@
-require_relative '../../lib/r2rdf/data_cube.rb'
-require_relative '../../lib/r2rdf/generators/dataframe.rb'
-require 'rdf/turtle'
-require 'tempfile'
-require 'rserve'
+# require_relative '../../lib/r2rdf/data_cube.rb'
+# require_relative '../../lib/r2rdf/generators/dataframe.rb'
+# require 'rdf/turtle'
+# require 'rserve'
+require_relative '../../lib/r2rdf/loader.rb'
 
-describe R2RDF::Generators::Dataframe do
+require 'tempfile'
+
+describe R2RDF::Dataset::Reader::Dataframe do
 	
 	def create_graph(turtle_string)
 		f = Tempfile.new('graph')
@@ -21,7 +23,7 @@ describe R2RDF::Generators::Dataframe do
   context "with r/qtl dataframe" do
 		before(:all) do 
 			@r = Rserve::Connection.new
-			@generator = R2RDF::Generators::Dataframe.new
+			@generator = R2RDF::Dataset::Reader::Dataframe.new
 			@r.eval <<-EOF
 				library(qtl)
 				data(listeria)
@@ -39,6 +41,9 @@ EOF
 		it "creates correct graph according to refrence file" do
 			# cube = R2RDF::Cube.new('mr')
 			# turtle_string = cube.generate_n3(@rexp)
+			open('ooot.ttl','w'){|f|
+				f.write(@turtle)
+			}
 			reference = IO.read(File.dirname(__FILE__) + '/../turtle/reference')
 			@turtle.should eq reference
 		end

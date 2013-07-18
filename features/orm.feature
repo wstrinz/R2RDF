@@ -44,6 +44,6 @@ Feature: generate data using ORM
     And I add a "species" measure
     And I add the observation {species: "Hypsibius dujardini", robustness: 9001}
     And I call the cubes add_publisher method with the arguments "Moss Piglets Unlimited", "http://mosspiglet.org/"
-		Then the to_n3 method should return a string with 1 "dct:publisher"
+		Then the to_n3 method should return a string with a "dct:publisher"
     
 

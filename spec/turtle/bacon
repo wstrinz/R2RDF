@@ -42,21 +42,21 @@ cs:deliciousness a qb:ComponentSpecification ;
 	qb:measure prop:deliciousness .
 
 prop:producer a rdf:Property, qb:DimensionProperty ;
-  rdfs:label "producer"@en ;
-  qb:codeList code:producer ;
-  rdfs:range code:Producer .
+	rdfs:label "producer"@en ;
+	qb:codeList code:producer ;
+	rdfs:range code:Producer .
 
 prop:pricerange a rdf:Property, qb:DimensionProperty ;
-  rdfs:label "pricerange"@en ;
-  qb:codeList code:pricerange ;
-  rdfs:range code:Pricerange .
+	rdfs:label "pricerange"@en ;
+	qb:codeList code:pricerange ;
+	rdfs:range code:Pricerange .
 
 prop:chunkiness a rdf:Property, qb:MeasureProperty ;
-  rdfs:label "chunkiness"@en .
-          
+	rdfs:label "chunkiness"@en .
+
 prop:deliciousness a rdf:Property, qb:MeasureProperty ;
-  rdfs:label "deliciousness"@en .
-          
+	rdfs:label "deliciousness"@en .
+
 code:Producer a rdfs:Class, owl:Class;
 	rdfs:subClassOf skos:Concept ;
 	rdfs:label "Code list for producer - codelist class"@en;

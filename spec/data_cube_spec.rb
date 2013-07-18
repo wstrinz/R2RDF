@@ -1,17 +1,19 @@
-require_relative '../lib/r2rdf/data_cube.rb'
-require_relative '../lib/r2rdf/generators/dataframe.rb'
-require_relative '../lib/r2rdf/r_client.rb'
-require_relative '../lib/r2rdf/r_builder.rb'
-require_relative '../lib/r2rdf/generators/csv.rb'
+# require_relative '../lib/r2rdf/data_cube.rb'
+# require_relative '../lib/r2rdf/generators/dataframe.rb'
+# require_relative '../lib/r2rdf/r_client.rb'
+# require_relative '../lib/r2rdf/r_builder.rb'
+# require_relative '../lib/r2rdf/generators/csv.rb'
+
+require_relative '../lib/r2rdf/loader.rb'
 
 
-describe R2RDF::Generator do
+describe R2RDF::Dataset::DataCube do
 
 	context "with Plain Old Ruby objects" do
 		#define a temporary class to use module methods
 		before(:all) do
 			class Gen
-				include R2RDF::Generator
+				include R2RDF::Dataset::DataCube
 			end
 
 			@generator = Gen.new
@@ -28,10 +30,10 @@ describe R2RDF::Generator do
 			}
 		end
 
-		it "should correct output according to the reference file" do
+		it "should have correct output according to the reference file" do
 			
 			turtle_string = @generator.generate(@measures, @dimensions, @codes,	@data, @labels, 'bacon')
-			 ref = IO.read(File.dirname(__FILE__) + '/turtle/bacon')
+			ref = IO.read(File.dirname(__FILE__) + '/turtle/bacon')
 			turtle_string.should == ref
 		end
 

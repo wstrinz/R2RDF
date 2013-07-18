@@ -1,9 +1,10 @@
-require_relative '../lib/r2rdf/data_cube.rb'
-require_relative '../lib/r2rdf/generators/dataframe.rb'
-require_relative '../lib/r2rdf/r_client.rb'
-require_relative '../lib/r2rdf/r_builder.rb'
-require_relative '../lib/r2rdf/query_helper.rb'
-require_relative '../lib/r2rdf/generators/csv.rb'
+# require_relative '../lib/r2rdf/data_cube.rb'
+# require_relative '../lib/r2rdf/generators/dataframe.rb'
+# require_relative '../lib/r2rdf/r_client.rb'
+# require_relative '../lib/r2rdf/r_builder.rb'
+# require_relative '../lib/r2rdf/query_helper.rb'
+# require_relative '../lib/r2rdf/generators/csv.rb'
+require_relative '../lib/r2rdf/loader.rb'
 
 
 describe R2RDF::Rbuilder do
@@ -23,7 +24,7 @@ EOF
 		it "produces equivalent dataframe from rdf" do
 			#(a) problem is that builder and the @r connection are different b/c of
 			#how rserve works
-			@builder.from_turtle(File.dirname(__FILE__) +'/turtle/reference','mr', 'mo', false, false)
+			@builder.from_turtle(File.dirname(__FILE__) +'/turtle/reference', @r, 'mr', 'mo', false, false)
 			puts @r.eval('ls()').payload.to_ruby
 			@r.eval('identical(mr,mo)').to_ruby.should == true
 		end

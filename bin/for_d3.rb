@@ -2,7 +2,7 @@ require_relative '../lib/r2rdf/data_cube.rb'
 require 'rserve'
 
 class Gen
-	include R2RDF::Generator
+	include R2RDF::Dataset::DataCube
 end
 
 def peaks(connection)

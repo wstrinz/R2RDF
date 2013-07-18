@@ -1,10 +1,12 @@
-require_relative '../../lib/r2rdf/data_cube.rb'
-require_relative '../../lib/r2rdf/generators/r_matrix.rb'
-require 'rdf/turtle'
-require 'tempfile'
-require 'rserve'
+# require_relative '../../lib/r2rdf/data_cube.rb'
+# require_relative '../../lib/r2rdf/generators/r_matrix.rb'
+# require 'rdf/turtle'
+# require 'rserve'
+require_relative '../../lib/r2rdf/loader.rb'
 
-describe R2RDF::Generators::RMatrix do
+require 'tempfile'
+
+describe R2RDF::Dataset::Reader::RMatrix do
 	
 	def create_graph(turtle_string)
 		f = Tempfile.new('graph')
@@ -16,7 +18,7 @@ describe R2RDF::Generators::RMatrix do
 	end
 
 	before(:each) do 
-		@generator = R2RDF::Generators::RMatrix.new
+		@generator = R2RDF::Dataset::Reader::RMatrix.new
 		@connection = Rserve::Connection.new 
 	end
 

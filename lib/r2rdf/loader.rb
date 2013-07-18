@@ -9,16 +9,17 @@ def load_folder(folder)
 	end
 end
 
-load File.dirname(__FILE__) + '/data_cube.rb'
-load File.dirname(__FILE__) + '/query_helper.rb'
+load File.dirname(__FILE__) + '/dataset/data_cube.rb'
+load File.dirname(__FILE__) + '/query/query_helper.rb'
 load File.dirname(__FILE__) + '/r_client.rb'
 load File.dirname(__FILE__) + '/r_builder.rb'
 load File.dirname(__FILE__) + '/analyzer.rb'
 load File.dirname(__FILE__) + '/store.rb'
 
 
-load_folder('generators')
-load_folder('ORM')
+load_folder('metadata')
+load_folder('dataset/generators')
+load_folder('dataset/ORM')
 # Dir.foreach(File.dirname(__FILE__) + '/generators') do |file|
 # 	unless file == "." or file == ".."
 # 		load File.dirname(__FILE__) + '/generators/' + file

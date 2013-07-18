@@ -1,7 +1,7 @@
 require_relative '../lib/r2rdf/loader.rb'
 
 Given /^a (.*) generator$/ do |generator|
-	@generator = R2RDF::Generators.const_get(generator).new
+	@generator = R2RDF::Dataset::Reader.const_get(generator).new
 end
 
 When /^I ask for its methods$/ do

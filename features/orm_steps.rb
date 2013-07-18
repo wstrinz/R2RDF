@@ -61,7 +61,6 @@ end
 
 When /^adding the observation (.*) should raise error (.*)$/ do |obs,err|
 	data = eval(obs)
-	# obs.split(',').map{|entry| data[entry.chomp.strip.split(':')[0].to_s] = eval(entry.chomp.strip.split(':')[1])}
 	expect { @cube.add_observation(data) }.to raise_error(err)
 end
 
@@ -76,5 +75,9 @@ end
 
 Then /^the to_n3 method should raise error (.*?)$/ do |err|
 	expect { @cube.to_n3 }.to raise_error(err)
+end
+
+Then /^the to_n3 method should return a string with a "(.*?)"$/ do |search|
+	@cube.to_n3[search].should_not be nil
 end
 
