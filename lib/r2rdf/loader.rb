@@ -10,6 +10,7 @@ def load_folder(folder)
 end
 
 load File.dirname(__FILE__) + '/dataset/data_cube.rb'
+load File.dirname(__FILE__) + '/dataset/interactive.rb'
 load File.dirname(__FILE__) + '/query/query_helper.rb'
 load File.dirname(__FILE__) + '/r_client.rb'
 load File.dirname(__FILE__) + '/r_builder.rb'

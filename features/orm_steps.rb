@@ -25,7 +25,7 @@ require_relative '../lib/r2rdf/loader.rb'
 
 
 Given /^an ORM::DataCube entitled "(.*?)"$/ do |name|
-	@cube = R2RDF::ORM::DataCube.new(name: name)
+	@cube = R2RDF::Dataset::ORM::DataCube.new(name: name)
 end
 
 Given /^an ORM::DataCube entitled "(.*?)" with the following options:$/ do |name, opts|
@@ -42,7 +42,7 @@ Given /^an ORM::DataCube entitled "(.*?)" with the following options:$/ do |name
 
 		options_hash[k] = v
 	}
-	@cube = R2RDF::ORM::DataCube.new(options_hash)
+	@cube = R2RDF::Dataset::ORM::DataCube.new(options_hash)
 end
 
 When /^I add a "(.*?)" dimension$/ do |dim|
