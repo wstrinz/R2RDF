@@ -7,7 +7,8 @@ module R2RDF
 			attr_accessor :labels
 			attr_accessor :dimensions
 			attr_accessor :measures
-			attr_accessor :obs
+      attr_accessor :obs
+			attr_accessor :meta
 
 			def initialize(options={})
 				@dimensions = {}
@@ -15,6 +16,8 @@ module R2RDF
 				@obs = []
 				@generator_options = {}
 				@options = {}
+
+        @meta = {}
 
 				parse_options options
 			end
@@ -71,7 +74,20 @@ module R2RDF
 
 				codes = @dimensions.map{|d,v| d if v[:type] == :coded}.compact
 
-				generate(@measures, @dimensions.keys, codes, data, @labels, @name, @generator_options)
+
+				str = generate(@measures, @dimensions.keys, codes, data, @labels, @name, @generator_options)
+
+        fields = {
+          publishers: publishers(),
+          subject: subjects(),
+          author: author(),
+          description: description(),
+          date: date(),
+        }
+
+        str += "\n" + metadata(fields,@generator_options)
+        puts str.class
+        str
 			end
 
 			def add_dimension(name, type=:coded)
@@ -93,7 +109,43 @@ module R2RDF
 				@obs << observation
 			end
 
-			def to_h
+      def publishers
+        @meta[:publishers] ||= []
+      end
+
+      def publishers=(publishers)
+        @meta[:publishers] = publishers
+      end
+
+      def subjects
+        @meta[:subject] ||= []
+      end
+
+      def subjects=(subjects)
+        @meta[:subject]=subjects
+      end
+
+      def add_publisher(label,uri)
+        publishers << {label: label, uri: uri}
+      end
+
+      def add_subject(id)
+        subject << id
+      end
+
+      def author
+        @meta[:creator] ||= ""
+      end
+
+      def description
+        @meta[:description] ||= ""
+      end
+
+      def date
+        @meta[:date] ||= "#{Time.now.day}-#{Time.now.month}-#{Time.now.year}"
+      end
+
+      def to_h
 				{
 					measures: @measures,
 					dimensions: @dimensions,

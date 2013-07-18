@@ -94,7 +94,8 @@ module R2RDF
       options = defaults().merge(options)
 			str = <<-EOF.unindent
 			ns:dataset-#{fields[:var]} rdfs:label "#{fields[:title]}";
-				dct:title "#{fields[:title]}";
+        dct:title "#{fields[:title]}";
+				dct:creator "#{fields[:creator]}";
 				rdfs:comment "#{fields[:description]}";
 				dct:description "#{fields[:description]}";
 				dct:issued "#{fields[:date]}"^^xsd:date;

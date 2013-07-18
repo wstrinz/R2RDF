@@ -65,6 +65,11 @@ When /^adding the observation (.*) should raise error (.*)$/ do |obs,err|
 	expect { @cube.add_observation(data) }.to raise_error(err)
 end
 
+When /^I call the cubes (.*) method with the arguments (.*)$/ do |method,args|
+  eval("args = #{args}")
+  @cube.send(method.to_sym, *args)
+end
+
 Then /^the to_n3 method should return a string$/ do
 	@cube.to_n3.is_a?(String).should be true
 end
