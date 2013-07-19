@@ -17,11 +17,11 @@ Feature: load triples into a store
 		Given a store of type fourstore
 		When I call the query method using the text in file spec/queries/integrity/1.rq
 		Then I should receive 0 results
-		When I call the query method using the text in file queries/test.rq
+		When I call the query method using the text in file resources/queries/test.rq
 		Then I should receive 10 results
 
 	Scenario: Run queries on graph based store
 		Given a store of type graph
 		When I call the stores add method with the turtle file spec/turtle/bacon and an RDF::Repository
 		Then calling the query method using the text in file spec/queries/integrity/1.rq should return 0 results
-		And calling the query method using the text in file queries/test.rq should return 10 results
+		And calling the query method using the text in file resources/queries/test.rq should return 10 results

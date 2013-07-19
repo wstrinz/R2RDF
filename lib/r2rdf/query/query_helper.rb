@@ -26,7 +26,32 @@ module R2RDF
       }
     end
 
-    # def execute(query,repo)
+    def observation_hash(response,shorten_uris=false,method='to_s')
+    	h={}
+    	response.map{|sol|
+    		(h[sol[:observation].to_s] ||= {})[sol[:property].to_s] = sol[:value].to_s
+    	}
+
+    	if shorten_uris
+				simplify = lambda{|string| string.split('/').last.split('#').last}
+	    	newh= {}
+	    	h.map{|k,v| 
+	    		newh[simplify.call(k)] ||= {}
+	    		v.map{|kk,vv| 
+	    			# puts newh[simplify.call(k)]
+	    			# puts newh[simplify.call(k)].class
+	    			# puts newh.first.class
+	    			newh[simplify.call(k)][simplify.call(kk)] = simplify.call(vv)
+	    		}
+	    	}
+	    	# puts newh
+	    	newh
+	    else
+	    	h
+	    end
+    end
+
+    # def execute_internal(query,repo)
     #   SPARQL.execute(query,repo)
     # end
 
@@ -36,17 +61,17 @@ module R2RDF
 			elsif type == :fourstore
 				sparql = SPARQL::Client.new(store+"/sparql/")
 		  end
-			
+			# execute_internal(string, store)
 			sparql.query(string)
     end
 
-    def from_file(file,store,type=:fourstore)
+    def execute_from_file(file,store,type=:fourstore)
     	if File.exist?(file)
     		string = IO.read(file)
-    	elsif File.exist?(File.dirname(__FILE__) + '/../../resources/queries/' + file)
-    		string = IO.read(File.dirname(__FILE__) + '/../../resources/queries/' + file)
-    	elsif File.exist?(File.dirname(__FILE__) + '/../../resources/queries/' + file + '.rq')
-    		string = IO.read(File.dirname(__FILE__) + '/../../resources/queries/' + file + '.rq')
+    	elsif File.exist?(File.dirname(__FILE__) + '/../../../resources/queries/' + file)
+    		string = IO.read(File.dirname(__FILE__) + '/../../../resources/queries/' + file)
+    	elsif File.exist?(File.dirname(__FILE__) + '/../../../resources/queries/' + file + '.rq')
+    		string = IO.read(File.dirname(__FILE__) + '/../../../resources/queries/' + file + '.rq')
     	else
     		raise "couldn't find query for #{file}"
     	end
