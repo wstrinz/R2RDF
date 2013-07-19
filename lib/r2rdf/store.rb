@@ -1,6 +1,7 @@
 module R2RDF
   # handles connection and messaging to/from the triple store
   class Store
+  	include R2RDF::Query
     def defaults
 	    {
 	      type: :fourstore,
@@ -33,61 +34,17 @@ module R2RDF
       @options = defaults.merge(options)
     end
 
-    # def connection
-    #   @connection ||= new_connection
-    # end
-
-    # def new_connection
-    #   case @options[:type]
-    #   when :fourstore
-    #     @store = RDF::FourStore::Repository.new("#{@options[:url]}/")
-    #   end
-    # end
-
     def query(string)
+    	# execute(string, )
 			if @options[:type] == :graph
-				sparql = SPARQL::Client.new(@store)
+				execute(string, @store, :graph)
 			elsif @options[:type] == :fourstore
-				sparql = SPARQL::Client.new(@options[:url]+"/sparql/")
+				execute(string, @options[:url], :fourstore)
 		  end
-			result = sparql.query(string)
-			result
     end
 
    	def load_string(string)
 			#write to temp file and load   		
    	end
-
-    #TODO any place these case statements exist should have a check on if the
-    #repo conforms to the RDF::Repository interface, instead of calling insert
-    #for each one.
-    # def load_statement(statement)
-    #   case options[:type]
-    #   when :fourstore
-    #     repo.insert(s)
-    #   end
-    # end
-
-
-    # def clear
-    # 	@store.clear_statements
-    # end
-
-    # def load_string
-    #   case options[:type]
-    #   when :fourstore
-
-    #   end
-    # end
-
-    # def load(object, include_prefixes=true)
-    #   if object.is_a? RDF::Statement
-    #   	load_statement(object)
-    #   # elsif object.is_a? String
-        
-    #   else
-    #     puts "Don't know how to load objects of type #{object.class}"
-    #   end
-    # end
   end
 end

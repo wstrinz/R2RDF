@@ -6,7 +6,7 @@ require_relative '../../lib/r2rdf/loader.rb'
 
 require 'tempfile'
 
-describe R2RDF::Dataset::Reader::Dataframe do
+describe R2RDF::Reader::Dataframe do
 	
 	def create_graph(turtle_string)
 		f = Tempfile.new('graph')
@@ -23,7 +23,7 @@ describe R2RDF::Dataset::Reader::Dataframe do
   context "with r/qtl dataframe" do
 		before(:all) do 
 			@r = Rserve::Connection.new
-			@generator = R2RDF::Dataset::Reader::Dataframe.new
+			@generator = R2RDF::Reader::Dataframe.new
 			@r.eval <<-EOF
 				library(qtl)
 				data(listeria)

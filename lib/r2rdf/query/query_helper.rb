@@ -26,8 +26,32 @@ module R2RDF
       }
     end
 
-    def execute(query,repo)
-      SPARQL.execute(query,repo)
+    # def execute(query,repo)
+    #   SPARQL.execute(query,repo)
+    # end
+
+    def execute(string,store,type=:fourstore)
+    	if type == :graph || store.is_a?(RDF::Graph) || store.is_a?(RDF::Repository)    		
+				sparql = SPARQL::Client.new(store)
+			elsif type == :fourstore
+				sparql = SPARQL::Client.new(store+"/sparql/")
+		  end
+			
+			sparql.query(string)
+    end
+
+    def from_file(file,store,type=:fourstore)
+    	if File.exist?(file)
+    		string = IO.read(file)
+    	elsif File.exist?(File.dirname(__FILE__) + '/../../resources/queries/' + file)
+    		string = IO.read(File.dirname(__FILE__) + '/../../resources/queries/' + file)
+    	elsif File.exist?(File.dirname(__FILE__) + '/../../resources/queries/' + file + '.rq')
+    		string = IO.read(File.dirname(__FILE__) + '/../../resources/queries/' + file + '.rq')
+    	else
+    		raise "couldn't find query for #{file}"
+    	end
+
+    	execute(string, store, type)
     end
 
     def prefixes

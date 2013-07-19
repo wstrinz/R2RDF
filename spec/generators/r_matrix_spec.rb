@@ -6,7 +6,7 @@ require_relative '../../lib/r2rdf/loader.rb'
 
 require 'tempfile'
 
-describe R2RDF::Dataset::Reader::RMatrix do
+describe R2RDF::Reader::RMatrix do
 	
 	def create_graph(turtle_string)
 		f = Tempfile.new('graph')
@@ -18,7 +18,7 @@ describe R2RDF::Dataset::Reader::RMatrix do
 	end
 
 	before(:each) do 
-		@generator = R2RDF::Dataset::Reader::RMatrix.new
+		@generator = R2RDF::Reader::RMatrix.new
 		@connection = Rserve::Connection.new 
 	end
 

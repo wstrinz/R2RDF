@@ -13,13 +13,13 @@ load File.dirname(__FILE__) + '/dataset/data_cube.rb'
 load File.dirname(__FILE__) + '/dataset/interactive.rb'
 load File.dirname(__FILE__) + '/query/query_helper.rb'
 load File.dirname(__FILE__) + '/r_client.rb'
-load File.dirname(__FILE__) + '/r_builder.rb'
 load File.dirname(__FILE__) + '/analyzer.rb'
 load File.dirname(__FILE__) + '/store.rb'
 
 
 load_folder('metadata')
-load_folder('dataset/generators')
+load_folder('readers')
+load_folder('writers')
 load_folder('dataset/ORM')
 # Dir.foreach(File.dirname(__FILE__) + '/generators') do |file|
 # 	unless file == "." or file == ".."

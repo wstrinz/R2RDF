@@ -5,7 +5,7 @@ require_relative '../../lib/r2rdf/loader.rb'
 # require 'rdf/turtle'
 require 'tempfile'
 
-describe R2RDF::Dataset::Reader::CSV do
+describe R2RDF::Reader::CSV do
 	
 	def create_graph(turtle_string)
 		f = Tempfile.new('graph')
@@ -17,7 +17,7 @@ describe R2RDF::Dataset::Reader::CSV do
 	end
 
 	before(:each) do 
-		@generator = R2RDF::Dataset::Reader::CSV.new
+		@generator = R2RDF::Reader::CSV.new
 	end
 
 	context 'with reference CSV' do

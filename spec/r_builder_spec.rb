@@ -7,7 +7,7 @@
 require_relative '../lib/r2rdf/loader.rb'
 
 
-describe R2RDF::Rbuilder do
+describe R2RDF::Writer::Dataframe do
 
 	context "when using r/qtl dataframe" do
 
@@ -18,7 +18,7 @@ describe R2RDF::Rbuilder do
 				data(listeria)
 				mr = scanone(listeria,method="mr")
 EOF
-			@builder = R2RDF::Builder.new
+			@builder = R2RDF::Writer::Builder.new
 		end
 
 		it "produces equivalent dataframe from rdf" do
