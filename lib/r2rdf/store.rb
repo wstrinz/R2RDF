@@ -2,6 +2,7 @@ module R2RDF
   # handles connection and messaging to/from the triple store
   class Store
   	include R2RDF::Query
+
     def defaults
 	    {
 	      type: :fourstore,
@@ -41,6 +42,10 @@ module R2RDF
 			elsif @options[:type] == :fourstore
 				execute(string, @options[:url], :fourstore)
 		  end
+    end
+
+    def url
+    	@options[:url]
     end
   end
 end

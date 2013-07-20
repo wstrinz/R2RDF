@@ -22,12 +22,15 @@ Given /^an ORM::DataCube entitled "(.*?)" with the following options:$/ do |name
 end
 
 Given(/^a turtle string from file (.*)$/) do |file|
-	@turtle_string = IO.read(file)
+	@string = IO.read(file)
+end
+
+Given(/^the URI string "(.*?)"$/) do |uri|
+  @string = uri
 end
 
 When(/^I call the ORM::DataCube class method load on it$/) do
-	# puts R2RDF::Dataset::ORM::DataCube
-  @cube = R2RDF::Dataset::ORM::DataCube.load(@turtle_string)
+  @cube = R2RDF::Dataset::ORM::DataCube.load(@string)
 end
 
 When /^I add a "(.*?)" dimension$/ do |dim|

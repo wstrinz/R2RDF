@@ -32,9 +32,10 @@ module R2RDF
 					parse_options options if do_parse
 				end
 
-				def self.load(turtle_string,options={})
-					# dimensions = get_ary(execute_from_file('dimensions.rq'))
-					graph = create_graph(turtle_string)
+				def self.load(graph,options={},verbose=false)
+					
+					graph = create_graph(graph) unless graph =~ /^http/
+
 					# puts get_hashes(execute_from_file('dimension_ranges.rq',graph))
 					dimensions = Hash[get_hashes(execute_from_file('dimension_ranges.rq',graph),"to_s").map{|solution|
 						#TODO coded properties should be found via SPARQL queries
@@ -45,11 +46,15 @@ module R2RDF
 						end
 						[strip_uri(solution[:dimension]), {type: type}]
 					}]
+					puts "dimensions: #{dimensions}" if verbose
 					measures = get_ary(execute_from_file('measures.rq',graph)).flatten
+					puts "measures: #{measures}" if verbose
 					obs = execute_from_file('observations.rq',graph)
+					puts "observations: #{observations}" if verbose
 					observations = observation_hash(obs)
 					simple_observations = observation_hash(obs,true)
 					name = execute_from_file('dataset.rq',graph).to_h.first[:label]
+					puts "dataset: #{dataset}" if verbose
 
 					new_opts = {
 						measures: measures,
@@ -58,13 +63,8 @@ module R2RDF
 						name: name,
 					}
 
-					# puts new_opts[:observations]
-					# puts options
 					options = options.merge(new_opts)
-					# puts options
-
-
-
+					puts "creating #{options}" if verbose
 					self.new(options)
 				end
 				

@@ -19,6 +19,12 @@ Feature: generate data using ORM
   	Then I should receive an ORM::DataCube object
     And the to_n3 method should return a string
 
+  Scenario: load from endpoint
+  	Given the URI string "http://localhost:8080"
+  	When I call the ORM::DataCube class method load on it
+  	Then I should receive an ORM::DataCube object
+    And the to_n3 method should return a string
+
   Scenario: raise error when unknown components are used
     Given an ORM::DataCube entitled "animals"
     When I add a "robustness" dimension

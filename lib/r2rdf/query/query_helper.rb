@@ -39,10 +39,11 @@ module R2RDF
     def execute(string,store,type=:fourstore)
     	if type == :graph || store.is_a?(RDF::Graph) || store.is_a?(RDF::Repository)    		
 				sparql = SPARQL::Client.new(store)
+			elsif store.is_a? R2RDF::Store
+				sparql = SPARQL::Client.new(store.url+"/sparql/")				
 			elsif type == :fourstore
-				sparql = SPARQL::Client.new(store+"/sparql/")
+				sparql = SPARQL::Client.new(store+"/sparql/")				
 		  end
-			# execute_internal(string, store)
 			sparql.query(string)
     end
 
@@ -56,7 +57,6 @@ module R2RDF
     	else
     		raise "couldn't find query for #{file}"
     	end
-
     	execute(string, store, type)
     end
 

@@ -7,6 +7,5 @@ When(/^I call its from_turtle method on the file (.*) with the variable "(.*?)"$
 end
 
 Then(/^I should receive a \.arff file as a string$/) do
-  puts @result.inspect
-  # pending # express the regexp above with the code you wish you had
+  @result.is_a?(String).should be true
 end
