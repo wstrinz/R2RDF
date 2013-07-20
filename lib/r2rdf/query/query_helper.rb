@@ -1,5 +1,21 @@
-require 'rdf'
-require 'sparql'
+module RDF
+	class Query
+		class Solutions
+			def to_h
+				arr=[]
+	    	self.map{|solution|
+	    		h={}
+	    		solution.map{|element|
+						 	h[element[0]] = element[1]
+	    		}
+	    		arr << h
+	    	}
+	    	arr
+			end
+		end
+	end
+end
+
 module R2RDF
   #.gsub(/^\s+/,'')
   module Query
@@ -14,42 +30,7 @@ module R2RDF
       }
     end
 
-    def get_ary(response,method='to_s')
-      response.map{|solution|
-        solution.to_a.map{|entry|
-          if entry.last.respond_to? method
-	          entry.last.send(method)
-	        else
-	        	entry.last.to_s
-	        end
-        }
-      }
-    end
-
-    def observation_hash(response,shorten_uris=false,method='to_s')
-    	h={}
-    	response.map{|sol|
-    		(h[sol[:observation].to_s] ||= {})[sol[:property].to_s] = sol[:value].to_s
-    	}
-
-    	if shorten_uris
-				simplify = lambda{|string| string.split('/').last.split('#').last}
-	    	newh= {}
-	    	h.map{|k,v| 
-	    		newh[simplify.call(k)] ||= {}
-	    		v.map{|kk,vv| 
-	    			# puts newh[simplify.call(k)]
-	    			# puts newh[simplify.call(k)].class
-	    			# puts newh.first.class
-	    			newh[simplify.call(k)][simplify.call(kk)] = simplify.call(vv)
-	    		}
-	    	}
-	    	# puts newh
-	    	newh
-	    else
-	    	h
-	    end
-    end
+    
 
     # def execute_internal(query,repo)
     #   SPARQL.execute(query,repo)
@@ -79,18 +60,18 @@ module R2RDF
     	execute(string, store, type)
     end
 
-    def prefixes
-      <<-EOF
-PREFIX ns:     <http://www.rqtl.org/ns/#> 
-PREFIX qb:   <http://purl.org/linked-data/cube#> 
-PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
-PREFIX prop: <http://www.rqtl.org/dc/properties/> 
-PREFIX cs:   <http://www.rqtl.org/dc/cs/>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
+#     def prefixes
+#       <<-EOF
+# PREFIX ns:     <http://www.rqtl.org/ns/#> 
+# PREFIX qb:   <http://purl.org/linked-data/cube#> 
+# PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+# PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+# PREFIX prop: <http://www.rqtl.org/dc/properties/> 
+# PREFIX cs:   <http://www.rqtl.org/dc/cs/>
+# PREFIX skos: <http://www.w3.org/2004/02/skos/core#> 
 
-      EOF
-    end
+#       EOF
+#     end
 
     def property_values(var, property)
       str = prefixes

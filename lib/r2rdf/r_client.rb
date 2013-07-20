@@ -1,6 +1,5 @@
 module R2RDF
 	module Rconnect
-		require 'rserve'
 		
 		def connect(address=nil)
 			if address

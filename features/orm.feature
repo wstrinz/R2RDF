@@ -3,7 +3,7 @@ Feature: generate data using ORM
 	In order to make the generator simpler and more accessible to ruby users
 	I want to implement an ORM (OTM? OGM?) to assist creation of datacube objects
 
-	Scenario: generate turtle for a simple object
+	Scenario: build data cube and export turtle
 		Given an ORM::DataCube entitled "cats"
 		When I add a "size" dimension
 		And I add a "breed" dimension
@@ -12,6 +12,12 @@ Feature: generate data using ORM
 		And I add the observation {size: "huge", breed: "Maine Coon", fluffiness: 9001}
 		And I add the observation {size: "little", breed: "American Shorthair", fluffiness: 15}
     Then the to_n3 method should return a string
+
+  Scenario: load from turtle string
+  	Given a turtle string from file spec/turtle/bacon
+  	When I call the ORM::DataCube class method load on it
+  	Then I should receive an ORM::DataCube object
+    And the to_n3 method should return a string
 
   Scenario: raise error when unknown components are used
     Given an ORM::DataCube entitled "animals"
@@ -45,5 +51,4 @@ Feature: generate data using ORM
     And I add the observation {species: "Hypsibius dujardini", robustness: 9001}
     And I call the cubes add_publisher method with the arguments "Moss Piglets Unlimited", "http://mosspiglet.org/"
 		Then the to_n3 method should return a string with a "dct:publisher"
-    
 

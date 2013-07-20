@@ -42,9 +42,5 @@ module R2RDF
 				execute(string, @options[:url], :fourstore)
 		  end
     end
-
-   	def load_string(string)
-			#write to temp file and load   		
-   	end
   end
 end

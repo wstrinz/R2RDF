@@ -1,4 +1,3 @@
-require 'csv'
 module R2RDF
 	module Reader
 		class CSV

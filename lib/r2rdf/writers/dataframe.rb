@@ -1,7 +1,3 @@
-require 'sparql'
-require 'sparql/client'
-require 'rdf/turtle'
-
 module R2RDF
 		module Writer
 	  	module Dataframe

@@ -21,7 +21,7 @@ module R2RDF
 
 			end_str = ""
 
-			if fields[:subject]
+			if fields[:subject] && fields[:subject].size > 0
 				str << "\tdct:subject \n"
 				fields[:subject].each{|subject| str << "\t\t" + subject + ",\n" }
 				str[-2] = ";"

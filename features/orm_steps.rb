@@ -1,29 +1,5 @@
 require_relative '../lib/r2rdf/loader.rb'
 
-# Given /a store of type (.*?)$/ do |type|
-# 	@store = R2RDF::Store.new(type: :"#{type}")
-# end
-
-# When /^I call the stores add method with the turtle file (.*?) and an (.*?)$/ do |file,graph|
-# 	graph = Object.const_get(graph).new #rescue graph
-# 	@graph = @store.add(file,graph)
-# end
-
-# When /^I call the stores add method with the turtle file (.*?) the graph name "(.*?)"$/ do |file,graph|
-# 	@graph = @store.add(file,graph)
-# end
-
-
-# Then /^I should recieve a non-empty graph$/ do
-# 	@graph.is_a?(RDF::Graph).should be true
-# 	@graph.size.should > 0
-# end
-
-# Then /^raise the result$/ do
-# 	raise "got @graph"
-# end
-
-
 Given /^an ORM::DataCube entitled "(.*?)"$/ do |name|
 	@cube = R2RDF::Dataset::ORM::DataCube.new(name: name)
 end
@@ -43,6 +19,15 @@ Given /^an ORM::DataCube entitled "(.*?)" with the following options:$/ do |name
 		options_hash[k] = v
 	}
 	@cube = R2RDF::Dataset::ORM::DataCube.new(options_hash)
+end
+
+Given(/^a turtle string from file (.*)$/) do |file|
+	@turtle_string = IO.read(file)
+end
+
+When(/^I call the ORM::DataCube class method load on it$/) do
+	# puts R2RDF::Dataset::ORM::DataCube
+  @cube = R2RDF::Dataset::ORM::DataCube.load(@turtle_string)
 end
 
 When /^I add a "(.*?)" dimension$/ do |dim|
@@ -81,3 +66,6 @@ Then /^the to_n3 method should return a string with a "(.*?)"$/ do |search|
 	@cube.to_n3[search].should_not be nil
 end
 
+Then(/^I should receive an ORM::DataCube object$/) do
+  @cube.is_a?(R2RDF::Dataset::ORM::DataCube).should == true
+end
