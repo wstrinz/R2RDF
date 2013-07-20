@@ -184,35 +184,34 @@ module R2RDF
   			var = sanitize([var]).first
         options = defaults().merge(options)
   			obs = []
-  			
-  				observation_labels.each_with_index.map{|r, i|
-  					contains_nulls = false
-						str = <<-EOF.unindent 
-						ns:obs#{r} a qb:Observation ;
-							qb:dataSet ns:dataset-#{var} ;
-						EOF
+				observation_labels.each_with_index.map{|r, i|
+					contains_nulls = false
+					str = <<-EOF.unindent 
+					ns:obs#{r} a qb:Observation ;
+						qb:dataSet ns:dataset-#{var} ;
+					EOF
 
-  					str << "\trdfs:label \"#{r}\" ;\n" unless options[:no_labels]
-  					
-  					dimensions.map{|d|
-  						contains_nulls = contains_nulls | (data[d][i] == nil)
-  						if codes.include? d
-  							str << "\tprop:#{d} <code/#{d.downcase}/#{data[d][i]}> ;\n"
-  						else
-  							str << "\tprop:#{d} ns:#{to_resource(data[d][i], options)} ;\n"
-  						end
-  					}
+					str << "\trdfs:label \"#{r}\" ;\n" unless options[:no_labels]
+					
+					dimensions.map{|d|
+						contains_nulls = contains_nulls | (data[d][i] == nil)
+						if codes.include? d
+							str << "\tprop:#{d} <code/#{d.downcase}/#{data[d][i]}> ;\n"
+						else
+							str << "\tprop:#{d} ns:#{to_resource(data[d][i], options)} ;\n"
+						end
+					}
 
-  					measures.map{|m|
-  						contains_nulls = contains_nulls | (data[m][i] == nil)
-  						str << "\tprop:#{m} #{to_literal(data[m][i], options)} ;\n" 
-  						
-  					}
+					measures.map{|m|
+						contains_nulls = contains_nulls | (data[m][i] == nil)
+						str << "\tprop:#{m} #{to_literal(data[m][i], options)} ;\n" 
+						
+					}
 
-  					str << "\t.\n\n"
-  					obs << str unless contains_nulls && !options[:encode_nulls]
+					str << "\t.\n\n"
+					obs << str unless contains_nulls && !options[:encode_nulls]
 
-  				}
+				}
   			obs
   		end
 

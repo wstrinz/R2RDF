@@ -8,7 +8,8 @@ module R2RDF
 				@options = options
 				comps =  components(arff)
 				obs = data(arff, comps.keys)
-				generate(comps.reject{|c| comps[c][:codes]}.keys, comps.select{|c| comps[c][:codes]}.keys, comps.select{|c| comps[c][:codes]}.keys, obs, (1..obs.first[1].size).to_a, relation(arff), options)
+				repl = generate(comps.reject{|c| comps[c][:codes]}.keys, comps.select{|c| comps[c][:codes]}.keys, comps.select{|c| comps[c][:codes]}.keys, obs, (1..obs.first[1].size).to_a, relation(arff), options)
+				
 			end
 
 			def relation(arff)

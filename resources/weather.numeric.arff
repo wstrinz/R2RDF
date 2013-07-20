@@ -5,7 +5,6 @@
 @attribute humidity real
 @attribute windy {TRUE, FALSE}
 @attribute play {yes, no}
-@attribute astring string
 
 @data
 sunny,85,85,FALSE,no
