@@ -27,10 +27,6 @@ EOS
 			end
 
 			def from_turtle(turtle_file, verbose=false)
-				# unless dataset_name && relation_name
-				# 	puts "no variable specified. Simple inference coming soon" if verbose
-				# 	return
-				# end
 				puts "loading #{turtle_file}" if verbose
 				repo = RDF::Repository.load(turtle_file)
 				puts "loaded #{repo.size} statements into temporary repo" if verbose
@@ -38,6 +34,9 @@ EOS
 				dims = get_ary(execute_from_file("dimensions.rq",repo,:graph)).flatten
 				meas = get_ary(execute_from_file("measures.rq",repo,:graph)).flatten
 				relation = execute_from_file("dataset.rq",repo,:graph).to_h.first[:label].to_s
+				codes = execute_from_file("codes.rq",repo,:graph).to_h.map{|e| e.values.map(&:to_s)}.inject({}){|h,el|
+					(h[el.first]||=[]) << el.last; h
+				}
 
 				data = observation_hash(execute_from_file("observations.rq",repo,:graph), true)
 				attributes = {}
@@ -48,7 +47,11 @@ EOS
 						when "xsd:double"
 							"real"
 						when :coded
-							"string"
+							if dims.include? component
+								"{#{codes[component].join(',')}}"
+							else
+								"string"
+							end
 						end
 				}
 
@@ -56,7 +59,7 @@ EOS
 			end
 
 			def from_store(endpoint_url,variable_in=nil, variable_out=nil, verbose=false)
-				
+				raise "not implemented yet"
 			end
 		end
 	end
