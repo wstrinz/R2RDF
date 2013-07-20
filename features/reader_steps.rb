@@ -24,9 +24,14 @@ EOF
 
 end
 
-When /^I provide the reference file (.*) and the label "(.*?)"$/ do |file, label|
+When /^I provide the.* file (.*) and the label "(.*?)"$/ do |file, label|
 	raise "Cant find #{file}" unless File.exist? file
 	@attr = file,label
+end
+
+When /^I provide the.* file (\S+)$/ do |file|
+	raise "Cant find #{file}" unless File.exist? file
+	@attr = file
 end
 
 When /^generate a turtle string from it$/ do

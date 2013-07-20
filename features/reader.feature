@@ -16,3 +16,10 @@ Feature: generate RDF
 			And generate a turtle string from it 
 		Then the result should contain a "qb:dataSet"
 			And the result should contain some "qb:Observation"s
+
+	Scenario: generate turtle RDF from an ARFF file
+		Given a ARFF generator
+		When I provide the file resources/weather.numeric.arff
+			And generate a turtle string from it 
+		Then the result should contain a "qb:dataSet"
+			And the result should contain some "qb:Observation"s

@@ -5,5 +5,5 @@ Feature: export to various formats using writers
 
 	Scenario: write to ARFF format
 		Given a ARFF writer
-		When I call its from_turtle method on the file spec/turtle/bacon with the variable "bacon"
+		When I call its from_turtle method on the file spec/turtle/bacon
 		Then I should receive a .arff file as a string

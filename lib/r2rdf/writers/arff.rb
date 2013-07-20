@@ -10,7 +10,7 @@ module R2RDF
 % 1. Title: #{relation.capitalize} Database
 %
 % 2. Sources:
-%			(a) Generated from RDF source #{source}
+%    (a) Generated from RDF source #{source}
 %     
 @RELATION #{relation}
 
@@ -22,15 +22,15 @@ EOS
 
 				str << "\n@DATA\n"
 				data.map { |d| str << Hash[d[1].sort].values.join(',') + "\n" }
-				
+
 				str
 			end
 
-			def from_turtle(turtle_file, dataset_name=nil, relation_name=nil, verbose=false)
-				unless dataset_name && relation_name
-					puts "no variable specified. Simple inference coming soon" if verbose
-					return
-				end
+			def from_turtle(turtle_file, verbose=false)
+				# unless dataset_name && relation_name
+				# 	puts "no variable specified. Simple inference coming soon" if verbose
+				# 	return
+				# end
 				puts "loading #{turtle_file}" if verbose
 				repo = RDF::Repository.load(turtle_file)
 				puts "loaded #{repo.size} statements into temporary repo" if verbose
@@ -55,17 +55,8 @@ EOS
 				build_arff(relation, attributes, data, turtle_file)
 			end
 
-			def from_store(endpoint_url,connection,variable_in=nil, variable_out=nil, verbose=true, save=true)
-				unless variable_in && variable_out
-					puts "no variable specified. Simple inference coming soon" if verbose
-					return
-				end
-				puts "connecting to endpoint at #{endpoint_url}" if verbose
-				sparql = SPARQL::Client.new(endpoint_url)
-				query = R2RDF::QueryHelper.new
-
-				rows = query.get_ary(sparql.query(query.row_names(variable_in))).flatten
-
+			def from_store(endpoint_url,variable_in=nil, variable_out=nil, verbose=false)
+				
 			end
 		end
 	end
