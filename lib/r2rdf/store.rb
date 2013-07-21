@@ -6,7 +6,8 @@ module R2RDF
     def defaults
 	    {
 	      type: :fourstore,
-	      url: "http://localhost:8080" #TODO port etc should eventually be extracted from URI if given
+	      url: "http://localhost:8080", #TODO port etc should eventually be extracted from URI if given
+        replace: false
 	    }
 	  end
 
@@ -17,7 +18,11 @@ module R2RDF
 	  		@store = graph
 	  		@store
 	  	elsif @options[:type] == :fourstore
-		  	`curl --data-urlencode data@#{file} -d 'graph=http%3A%2F%2Frqtl.org%2F#{graph}' -d 'mime-type=application/x-turtle' #{@options[:url]}/data/`
+		  	if @options[:replace]
+          `curl -T #{file} -H 'Content-Type: application/x-turtle' #{@options[:url]}/data/http%3A%2F%2Frqtl.org%2F#{graph}`
+        else
+          `curl --data-urlencode data@#{file} -d 'graph=http%3A%2F%2Frqtl.org%2F#{graph}' -d 'mime-type=application/x-turtle' #{@options[:url]}/data/`
+        end
 		  end
 	  end
 

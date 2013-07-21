@@ -43,20 +43,20 @@ module R2RDF
 				sparql = SPARQL::Client.new(store.url+"/sparql/")				
 			elsif type == :fourstore
 				sparql = SPARQL::Client.new(store+"/sparql/")				
-		  end
-			sparql.query(string)
+      end
+      sparql.query(string)
     end
 
     def execute_from_file(file,store,type=:fourstore)
-    	if File.exist?(file)
-    		string = IO.read(file)
-    	elsif File.exist?(File.dirname(__FILE__) + '/../../../resources/queries/' + file)
-    		string = IO.read(File.dirname(__FILE__) + '/../../../resources/queries/' + file)
-    	elsif File.exist?(File.dirname(__FILE__) + '/../../../resources/queries/' + file + '.rq')
-    		string = IO.read(File.dirname(__FILE__) + '/../../../resources/queries/' + file + '.rq')
-    	else
-    		raise "couldn't find query for #{file}"
-    	end
+      if File.exist?(file)
+        string = IO.read(file)
+      elsif File.exist?(File.dirname(__FILE__) + '/../../../resources/queries/' + file)
+        string = IO.read(File.dirname(__FILE__) + '/../../../resources/queries/' + file)
+      elsif File.exist?(File.dirname(__FILE__) + '/../../../resources/queries/' + file + '.rq')
+        string = IO.read(File.dirname(__FILE__) + '/../../../resources/queries/' + file + '.rq')
+      else
+        raise "couldn't find query for #{file}"
+      end
     	execute(string, store, type)
     end
 

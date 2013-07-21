@@ -85,7 +85,7 @@ module R2RDF
 				@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
 				@prefix foaf:     <http://xmlns.com/foaf/0.1/> .
 				@prefix org:      <http://www.w3.org/ns/org#> .
-				@prefix prov: 		<http://www.w3.org/ns/prov#> .
+				@prefix prov:     <http://www.w3.org/ns/prov#> .
 
 				EOF
   		end

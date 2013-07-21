@@ -33,11 +33,12 @@ module R2RDF
 				end
 
 				def self.load(graph,options={},verbose=false)
-					
-					graph = create_graph(graph) unless graph =~ /^http/
 
-					# puts get_hashes(execute_from_file('dimension_ranges.rq',graph))
-					dimensions = Hash[get_hashes(execute_from_file('dimension_ranges.rq',graph),"to_s").map{|solution|
+          
+          graph = create_graph(graph) unless graph =~ /^http/
+
+          # puts get_hashes(execute_from_file('dimension_ranges.rq',graph))
+          dimensions = Hash[get_hashes(execute_from_file('dimension_ranges.rq',graph),"to_s").map{|solution|
 						#TODO coded properties should be found via SPARQL queries
 						if solution[:range].split('/')[-2] == "code"
 							type = :coded
@@ -49,12 +50,12 @@ module R2RDF
 					puts "dimensions: #{dimensions}" if verbose
 					measures = get_ary(execute_from_file('measures.rq',graph)).flatten
 					puts "measures: #{measures}" if verbose
+          name = execute_from_file('dataset.rq',graph).to_h.first[:label]
+          puts "dataset: #{name}" if verbose
 					obs = execute_from_file('observations.rq',graph)
-					puts "observations: #{observations}" if verbose
-					observations = observation_hash(obs)
-					simple_observations = observation_hash(obs,true)
-					name = execute_from_file('dataset.rq',graph).to_h.first[:label]
-					puts "dataset: #{dataset}" if verbose
+          puts "observations: #{obs}" if verbose
+          # observations = observation_hash(obs)
+          simple_observations = observation_hash(obs,true)
 
 					new_opts = {
 						measures: measures,
