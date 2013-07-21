@@ -4,8 +4,8 @@ Given /a store of type (.*?)$/ do |type|
 	@store = R2RDF::Store.new(type: :"#{type}")
 end
 
-When /^I call the stores add method with the turtle file (.*?) and an (.*?)$/ do |file,graph|
-	graph = Object.const_get(graph).new #rescue graph
+When /^I call the stores add method with the turtle file (.*?) and an RDF::(.*?)$/ do |file,graph|
+	graph = RDF.const_get(graph).new #rescue graph
 	@graph = @store.add(file,graph)
 end
 

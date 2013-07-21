@@ -1,10 +1,4 @@
-# require_relative '../../lib/r2rdf/data_cube.rb'
-# require_relative '../../lib/r2rdf/generators/dataframe.rb'
-# require 'rdf/turtle'
-# require 'rserve'
 require_relative '../../lib/r2rdf/loader.rb'
-
-require 'tempfile'
 
 describe R2RDF::Reader::Dataframe do
 	
@@ -17,9 +11,6 @@ describe R2RDF::Reader::Dataframe do
 		graph
 	end
 
-	# before(:each) do 
-	# 	@connection = Rserve::Connection.new 
-	# end
   context "with r/qtl dataframe" do
 		before(:all) do 
 			@r = Rserve::Connection.new

@@ -29,6 +29,11 @@ When /^I provide the.* file (.*) and the label "(.*?)"$/ do |file, label|
 	@attr = file,label
 end
 
+When /^I provide the.* file (.*) and the label "(.*?)" and the options (.*)$/ do |file, label, opts|
+  raise "Cant find #{file}" unless File.exist? file
+  @attr = file,label,eval(opts)
+end
+
 When /^I provide the.* file (\S+)$/ do |file|
 	raise "Cant find #{file}" unless File.exist? file
 	@attr = file
