@@ -39,11 +39,6 @@ EOF
 		end
 		
 		it "creates correct graph according to refrence file" do
-			# cube = R2RDF::Cube.new('mr')
-			# turtle_string = cube.generate_n3(@rexp)
-			open('ooot.ttl','w'){|f|
-				f.write(@turtle)
-			}
 			reference = IO.read(File.dirname(__FILE__) + '/../turtle/reference')
 			@turtle.should eq reference
 		end
